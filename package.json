@@ -7,6 +7,10 @@
     "engines": {
         "vscode": "^1.23.0"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sohibegit/vscode-java-generate-setters-getters"
+    },
     "categories": [
         "Programming Languages"
     ],
