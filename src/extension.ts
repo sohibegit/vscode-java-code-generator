@@ -141,7 +141,7 @@ export function generateToString(textPorperties: string) {
 \t\treturn "{" +\n`;
     for (let lineOfCode of classProperties) {
         let declaration = lineOfCode.replace('final ', ' ').replace('public ', ' ').replace('private ', ' ').trim().split(" ");
-        let variableType, variableName, variableNameFirstCapital: string = '';
+        let variableName, variableNameFirstCapital: string = '';
         let skip = false;
         if (declaration[0].charAt(0) === '@' || declaration[0].charAt(0) === '/') {
             continue;
@@ -157,7 +157,6 @@ export function generateToString(textPorperties: string) {
             vscode.window.showWarningMessage(declaration.join(' ') + ' skiped as it\'s unvalid');
             skip = true;
         } else if (declaration.length === 2) {
-            variableType = declaration[0];
             variableName = declaration[1];
             variableNameFirstCapital = capitalizeFirstLetter(declaration[1]);
         }
