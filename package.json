@@ -1,21 +1,22 @@
 {
     "name": "java-generate-setters-getters",
-    "displayName": "java-generate-setters-getters",
-    "description": "Java Generate Setters and Getters",
-    "version": "1.0.0",
+    "displayName": "Java Code Generators",
+    "description": "Java Code Generators",
+    "version": "2.0.0",
     "publisher": "sohibe",
     "engines": {
         "vscode": "^1.23.0"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/sohibegit/vscode-java-generate-setters-getters"
+        "url": "https://github.com/sohibegit/vscode-java-code-generator"
     },
     "categories": [
         "Programming Languages"
     ],
     "activationEvents": [
-        "onCommand:extension.javaGenerateSettersGetters"
+        "onCommand:extension.javaGenerateSettersGetters",
+        "onCommand:extension.javaGenerateToString"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -23,8 +24,26 @@
             {
                 "command": "extension.javaGenerateSettersGetters",
                 "title": "Java Generate Setters and Getters"
+            },
+            {
+                "command": "extension.javaGenerateToString",
+                "title": "Java Generate toString()"
             }
-        ]
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateSettersGetters",
+                    "group": "YourGroup@1"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateToString",
+                    "group": "YourGroup@2"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",

@@ -1,17 +1,22 @@
-# java-generate-setters-getters README
+# java-code-generators README
 Generate Setters & Getters for Java Class's
+Generate toString()
 
 ## Usage
-![how use](https://github.com/sohibegit/vscode-java-generate-setters-getters/blob/master/images/usage.gif?raw=true)
+![how use](images/usagev2.gif)
 
 ## Requirements
 none
 
 ## Release Notes
 
-### 1.0.0
-
-Initial release of Java Generate Setters Getters
+## [2.0.0] - 2018-07-22
+### Added
+- generate toString()
+### Fixed
+- Newline missing in some scenarios
+- ignoring @Annotations
+- ignoring one line comments
 
 -----------------------------------------------------------------------------------------------------------
 
