@@ -86,7 +86,7 @@ function generateSetterGetters(textPorperties: string): string {
 
     let result = '';
     for (let lineOfCode of classProperties) {
-        let declaration = lineOfCode.replace('final ', ' ').replace('public ', ' ').replace('private ', ' ').trim().split(" ");
+        let declaration = lineOfCode.split('=')[0].replace('final ', ' ').replace('public ', ' ').replace('private ', ' ').trim().split(" ");
         let variableType, variableName, variableNameFirstCapital: string = '';
         let skip = false;
 
@@ -114,11 +114,11 @@ function generateSetterGetters(textPorperties: string): string {
         if (!skip) {
             result +=
                 `
-\tpublic ${variableType} get${variableNameFirstCapital}(){
+\tpublic ${variableType} get${variableNameFirstCapital}() {
 \t\treturn this.${variableName};
 \t}
 
-\tpublic void ${variableType!.toLowerCase() === "boolean" ? "is" : "set"}${variableNameFirstCapital}(${variableType} ${variableName}){
+\tpublic void ${variableType!.toLowerCase() === "boolean" ? "is" : "set"}${variableNameFirstCapital}(${variableType} ${variableName}) {
 \t\tthis.${variableName} = ${variableName};
 \t}
 `;
@@ -140,7 +140,7 @@ export function generateToString(textPorperties: string) {
 \tpublic String toString() {
 \t\treturn "{" +\n`;
     for (let lineOfCode of classProperties) {
-        let declaration = lineOfCode.replace('final ', ' ').replace('public ', ' ').replace('private ', ' ').trim().split(" ");
+        let declaration = lineOfCode.split('=')[0].replace('final ', ' ').replace('public ', ' ').replace('private ', ' ').trim().split(" ");
         let variableName, variableNameFirstCapital: string = '';
         let skip = false;
         if (declaration[0].charAt(0) === '@' || declaration[0].charAt(0) === '/') {

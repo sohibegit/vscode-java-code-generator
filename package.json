@@ -2,7 +2,7 @@
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
     "description": "Java Code Generators",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "publisher": "sohibe",
     "engines": {
         "vscode": "^1.23.0"
@@ -45,6 +45,7 @@
             ]
         }
     },
+    "icon": "./images/java.png",
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
