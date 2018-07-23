@@ -45,7 +45,7 @@
             ]
         }
     },
-    "icon": "./images/java.png",
+    "icon": "images/java.png",
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
