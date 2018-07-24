@@ -1,6 +1,10 @@
-# java-code-generators README
-Generate Setters & Getters for Java Class's
-Generate toString()
+# Java Code Generators
+
+## Features
+- Generate Setters & Getters
+- Generate toString()
+- Generate Constructor
+- Generate Constructor Using Fields
 
 ## Usage
 ![how use](images/usagev2.gif)

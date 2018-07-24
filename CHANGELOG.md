@@ -1,5 +1,8 @@
 # Change Log
 
+## [2.1.1] - 2018-07-24
+- tweaks
+
 ## [2.1.0] - 2018-07-24
 ### Added
 - generate Constructor
