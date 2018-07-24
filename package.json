@@ -2,7 +2,7 @@
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
     "description": "Java Code Generators",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "publisher": "sohibe",
     "engines": {
         "vscode": "^1.23.0"
@@ -16,18 +16,28 @@
     ],
     "activationEvents": [
         "onCommand:extension.javaGenerateSettersGetters",
-        "onCommand:extension.javaGenerateToString"
+        "onCommand:extension.javaGenerateToString",
+        "onCommand:extension.javaGenerateConstructor",
+        "onCommand:extension.javaGenerateConstructorUsingFields"
     ],
     "main": "./out/extension",
     "contributes": {
         "commands": [
             {
                 "command": "extension.javaGenerateSettersGetters",
-                "title": "Java Generate Setters and Getters"
+                "title": "Java: Generate Setters and Getters"
             },
             {
                 "command": "extension.javaGenerateToString",
-                "title": "Java Generate toString()"
+                "title": "Java: Generate toString()"
+            },
+            {
+                "command": "extension.javaGenerateConstructor",
+                "title": "Java: Generate Constructor"
+            },
+            {
+                "command": "extension.javaGenerateConstructorUsingFields",
+                "title": "Java: Generate Constructor Using Fields"
             }
         ],
         "menus": {
@@ -41,6 +51,16 @@
                     "when": "resourceLangId == java",
                     "command": "extension.javaGenerateToString",
                     "group": "YourGroup@2"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateConstructor",
+                    "group": "YourGroup@3"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateConstructorUsingFields",
+                    "group": "YourGroup@4"
                 }
             ]
         }
