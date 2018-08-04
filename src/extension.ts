@@ -1,228 +1,129 @@
 'use strict';
 import * as vscode from 'vscode';
+import { getDeclerations, getClassName, insertSnippet, getSelectedText, lowerCaseFirstLetter } from './functions';
 import { Decleration } from './decleration';
 
 export function activate(context: vscode.ExtensionContext) {
 
 
-    let disposable = vscode.commands.registerCommand('extension.javaGenerateSettersGetters', () => {
-
-        let editor = vscode.window.activeTextEditor!;
-        if (!editor) {
-            return;
-        }
-        let selection = editor.selection;
-        let text = editor.document.getText(selection);
-        let insertNewLine = text.charAt(text.length - 1) !== '\n';
-        if (text.length < 2) {
-            vscode.window.showErrorMessage('select the properties first.');
-            return;
-        }
-        try {
-            editor.edit(
-                edit => editor.selections.forEach(
-                    selection => {
-                        if (insertNewLine) {
-                            edit.insert(selection.end, '\n' + generateSetterGetters(text));
-                        } else {
-                            edit.insert(selection.end, generateSetterGetters(text));
-                        }
-                    }
-                )
-            );
-        }
-        catch (error) {
-            console.error(error);
-            vscode.window.showErrorMessage(error.getText);
-        }
-
+    let generateSettersGettersCommand = vscode.commands.registerCommand('extension.javaGenerateSettersGetters', () => {
+        insertSnippet(generateSetterGetters(getDeclerations(getSelectedText())));
     });
 
-    let disposable2 = vscode.commands.registerCommand('extension.javaGenerateToString', () => {
-        let editor = vscode.window.activeTextEditor!;
-        if (!editor) {
-            return;
-        }
-        let selection = editor.selection;
-        let text = editor.document.getText(selection);
-        let insertNewLine = text.charAt(text.length - 1) !== '\n';
-        if (text.length < 2) {
-            vscode.window.showErrorMessage('select the properties first.');
-            return;
-        }
-        try {
-            editor.edit(
-                edit => editor.selections.forEach(
-                    selection => {
-                        if (insertNewLine) {
-                            edit.insert(selection.end, '\n' + generateToString(text));
-                        } else {
-                            edit.insert(selection.end, generateToString(text));
-                        }
-                    }
-                )
-            );
-        }
-        catch (error) {
-            console.error(error);
-            vscode.window.showErrorMessage(error.getText);
-        }
-
-
+    let generateToStringCommand = vscode.commands.registerCommand('extension.javaGenerateToString', () => {
+        insertSnippet(generateToString(getDeclerations(getSelectedText())));
     });
 
-    let generateConstructor = vscode.commands.registerCommand('extension.javaGenerateConstructor', () => {
-        let editor = vscode.window.activeTextEditor!;
-        if (!editor) {
-            return;
-        }
-        let className = getClassName(editor.document.getText());
-        console.log(className);
+    let generateConstructorCommand = vscode.commands.registerCommand('extension.javaGenerateConstructor', () => {
+        let className = getClassName(vscode.window.activeTextEditor!.document.getText());
         let result = `\n\tpublic ${className}() {\n\t}\n`;
-        let snippet = new vscode.SnippetString();
-        snippet.appendText(result);
-        editor.insertSnippet(snippet, new vscode.Position(editor.selection.active.line, 0));
+        insertSnippet(result);
     });
 
-    let generateConstructorUsingFields = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingFields', () => {
-        let editor = vscode.window.activeTextEditor!;
-        if (!editor) {
-            return;
-        }
-        let className = getClassName(editor.document.getText());
-        console.log(className);
-        let result = `\n\tpublic ${className}(`;
-
-        let selection = editor.selection;
-        let text = editor.document.getText(selection);
-        let insertNewLine = text.charAt(text.length - 1) !== '\n';
-        if (text.length < 2) {
-            vscode.window.showErrorMessage('select the properties first.');
-            return;
-        }
-
-        getDeclerations(text).forEach(it => {
-            result += `${it.variableType} ${it.variableName}, `;
-        });
-        result = result.slice(0, -2) + `) {\n`;
-
-        getDeclerations(text).forEach(it => {
-            result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
-        });
-
-        result += `\t}\n`;
-
-        editor.edit(
-            edit => editor.selections.forEach(
-                selection => {
-                    if (insertNewLine) {
-                        edit.insert(selection.end, '\n' + result);
-                    } else {
-                        edit.insert(selection.end, result);
-                    }
-                }
-            )
-        );
-
+    let generateConstructorUsingFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingFields', () => {
+        let className = getClassName(vscode.window.activeTextEditor!.document.getText());
+        insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
     });
 
-    context.subscriptions.push(disposable);
-    context.subscriptions.push(disposable2);
-    context.subscriptions.push(generateConstructor);
-    context.subscriptions.push(generateConstructorUsingFields);
+    let generateHashCodeAndEqualsCommand = vscode.commands.registerCommand('extension.javaGenerateHashCodeAndEquals', () => {
+        let className = getClassName(vscode.window.activeTextEditor!.document.getText());
+        let classNameFirstLower = lowerCaseFirstLetter(className);
+        insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, classNameFirstLower));
+    });
+
+    context.subscriptions.push(generateSettersGettersCommand);
+    context.subscriptions.push(generateToStringCommand);
+    context.subscriptions.push(generateConstructorCommand);
+    context.subscriptions.push(generateConstructorUsingFieldsCommand);
+    context.subscriptions.push(generateHashCodeAndEqualsCommand);
 }
 
-// this method is called when your extension is deactivated
+
+
+
 export function deactivate() {
-}
-function capitalizeFirstLetter(string: string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+
 }
 
-function generateSetterGetters(textPorperties: string): string {
+function generateSetterGetters(declerations: Decleration[]): string {
     let result = '';
-    getDeclerations(textPorperties).forEach(it => {
+    declerations.forEach(it => {
         result +=
-            `
-\tpublic ${it.variableType} get${it.variableNameFirstCapital}() {
+            `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital}() {
 \t\treturn this.${it.variableName};
 \t}
 
 \tpublic void ${it.variableType!.toLowerCase() === "boolean" ? "is" : "set"}${it.variableNameFirstCapital}(${it.variableType} ${it.variableName}) {
 \t\tthis.${it.variableName} = ${it.variableName};
-\t}
-`;
+\t}\n`;
     });
     return result;
 }
 
-
-
-
-
-export function generateToString(textPorperties: string) {
+export function generateToString(declerations: Decleration[]): string {
     let result =
         `\n\t@Override
 \tpublic String toString() {
 \t\treturn "{" +\n`;
 
-    getDeclerations(textPorperties).forEach(it => {
+    declerations.forEach(it => {
         result += `\t\t\t", ${it.variableName}='" + get${it.variableNameFirstCapital}() + "'" +\n`;
     });
 
     result += `\t\t\t"}";
-\t}`;
+\t}\n`;
 
     return result.replace(',', '');
 }
 
-
-
-export function getDeclerations(slectedText: string): Decleration[] {
-    const declerations: Decleration[] = [];
-
-    let classProperties = slectedText.split(/\r?\n/).filter(x => x.length > 2).map(x => x.replace(';', ''));
-
-    for (let lineOfCode of classProperties) {
-        let declaration = lineOfCode.split('=')[0].replace('final ', ' ').replace('public ', ' ').replace('private ', ' ').trim().split(" ");
-        let variableType, variableName, variableNameFirstCapital: string = '';
-        let skip = false;
-
-        if (declaration[0].charAt(0) === '@' || declaration[0].charAt(0) === '/') {
-            continue;
-        }
-
-        declaration.forEach(element => {
-            if (element === 'static') {
-                vscode.window.showWarningMessage(declaration[declaration.length - 1] + ' skiped as it\'s static');
-                skip = true;
-            }
-        });
-
-        if (declaration.length === 1) {
-            vscode.window.showWarningMessage(declaration.join(' ') + ' skiped as it\'s unvalid');
-            continue;
-        } else if (declaration.length === 2) {
-            variableType = declaration[0];
-            variableName = declaration[1];
-            variableNameFirstCapital = capitalizeFirstLetter(declaration[1]);
-        }
-
-        if (!skip) {
-            declerations.push(new Decleration(variableType, variableName, variableNameFirstCapital));
-        }
-    }
-    return declerations;
+export function generateConstructorUsingFields(declerations: Decleration[], className: string): string {
+    let result = `\n\tpublic ${className}(`;
+    declerations.forEach(it => {
+        result += `${it.variableType} ${it.variableName}, `;
+    });
+    result = result.slice(0, -2) + `) {\n`;
+    declerations.forEach(it => {
+        result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
+    });
+    result += `\t}\n`;
+    return result;
 }
 
-export function getClassName(classFile: string): string {
-    let regex = /(class|interface|enum)\s([^\n\s]*)/;
-    //  console.log(regex.exec(classFile));
-    let classDecleration = regex.exec(classFile);
-    if (classDecleration) {
-        return classDecleration[2];
+export function generateHashCodeAndEquals(declerations: Decleration[], className: string, classNameFirstLower: string): string {
+
+    let result = `\n\t@Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof ${className})) {
+            return false;
+        }
+        ${className} ${classNameFirstLower} = (${className}) o;
+        return `;
+
+    declerations.forEach(it => {
+        if (it.isPrimitive()) {
+            result += `${it.variableName} == ${classNameFirstLower}.${it.variableName} && `;
+        }
+        else {
+            result += `Objects.equals(${it.variableName}, ${classNameFirstLower}.${it.variableName}) && `;
+        }
+    });
+    result = result.slice(0, -4) + `;\n\t}`;
+
+    result += `\n\n\t@Override
+\tpublic int hashCode() {\n`;
+    if (declerations.length > 1) {
+        result += `\t\treturn Objects.hash(`;
     } else {
-        vscode.window.showErrorMessage('couldn\'t parse the class name please file an issue');
-        throw new Error('couldn\'t parse the class name please file an issue');
+        result += `\t\treturn Objects.hashCode(`;
     }
+
+    declerations.forEach(it => {
+        result += `${it.variableName}, `;
+    });
+    result = result.slice(0, -2) + `);\n`;
+
+    result += `\t}\n`;
+    return result;
 }

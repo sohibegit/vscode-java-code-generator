@@ -1,9 +1,35 @@
 {
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
-    "description": "Java Code Generators",
-    "version": "2.1.1",
+    "description": "Java Setter Getter toString Constructor hashCode equals code snippets generator",
+    "version": "3.0.0",
     "publisher": "sohibe",
+    "keywords": [
+        "java",
+        "generate",
+        "setter",
+        "getter",
+        "constructor",
+        "generator",
+        "set",
+        "get",
+        "toString",
+        "equals",
+        "hashCode",
+        "hash",
+        "java setter",
+        "java getter",
+        "java generate",
+        "java tostring",
+        "java constructor",
+        "java generate getter",
+        "java generate setter",
+        "java generate toString",
+        "java generate constructor",
+        "java generate equals",
+        "java generate hashCode",
+        "snippets"
+    ],
     "engines": {
         "vscode": "^1.23.0"
     },
@@ -12,13 +38,15 @@
         "url": "https://github.com/sohibegit/vscode-java-code-generator"
     },
     "categories": [
-        "Programming Languages"
+        "Programming Languages",
+        "Snippets"
     ],
     "activationEvents": [
         "onCommand:extension.javaGenerateSettersGetters",
         "onCommand:extension.javaGenerateToString",
         "onCommand:extension.javaGenerateConstructor",
-        "onCommand:extension.javaGenerateConstructorUsingFields"
+        "onCommand:extension.javaGenerateConstructorUsingFields",
+        "onCommand:extension.javaGenerateHashCodeAndEquals"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -38,6 +66,10 @@
             {
                 "command": "extension.javaGenerateConstructorUsingFields",
                 "title": "Java: Generate Constructor Using Fields"
+            },
+            {
+                "command": "extension.javaGenerateHashCodeAndEquals",
+                "title": "Java: Generate HashCode And Equals"
             }
         ],
         "menus": {
@@ -60,6 +92,11 @@
                 {
                     "when": "resourceLangId == java",
                     "command": "extension.javaGenerateConstructorUsingFields",
+                    "group": "YourGroup@4"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateHashCodeAndEquals",
                     "group": "YourGroup@4"
                 }
             ]
