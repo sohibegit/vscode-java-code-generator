@@ -6,29 +6,10 @@
     "publisher": "sohibe",
     "keywords": [
         "java",
-        "generate",
         "setter",
         "getter",
         "constructor",
-        "generator",
-        "set",
-        "get",
-        "toString",
-        "equals",
-        "hashCode",
-        "hash",
-        "java setter",
-        "java getter",
-        "java generate",
-        "java tostring",
-        "java constructor",
-        "java generate getter",
-        "java generate setter",
-        "java generate toString",
-        "java generate constructor",
-        "java generate equals",
-        "java generate hashCode",
-        "snippets"
+        "toString"
     ],
     "engines": {
         "vscode": "^1.23.0"
