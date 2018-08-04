@@ -6,6 +6,7 @@
 - Generate toString()
 - Generate Constructor
 - Generate Constructor Using Fields
+- Generate Equals And HashCode
 
 ## Usage
 
