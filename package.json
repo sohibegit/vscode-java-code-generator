@@ -1,8 +1,8 @@
 {
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
-    "description": "Java Setter Getter toString Constructor hashCode equals code snippets generator",
-    "version": "3.0.1",
+    "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
+    "version": "3.1.0",
     "publisher": "sohibe",
     "keywords": [
         "java",
@@ -27,7 +27,8 @@
         "onCommand:extension.javaGenerateToString",
         "onCommand:extension.javaGenerateConstructor",
         "onCommand:extension.javaGenerateConstructorUsingFields",
-        "onCommand:extension.javaGenerateHashCodeAndEquals"
+        "onCommand:extension.javaGenerateHashCodeAndEquals",
+        "onCommand:extension.javaGenerateFluentSetters"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -51,6 +52,10 @@
             {
                 "command": "extension.javaGenerateHashCodeAndEquals",
                 "title": "Java: Generate HashCode And Equals"
+            },
+            {
+                "command": "extension.javaGenerateFluentSetters",
+                "title": "Java: Generate Fluent Setters"
             }
         ],
         "menus": {
@@ -78,7 +83,12 @@
                 {
                     "when": "resourceLangId == java",
                     "command": "extension.javaGenerateHashCodeAndEquals",
-                    "group": "YourGroup@4"
+                    "group": "YourGroup@5"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateFluentSetters",
+                    "group": "YourGroup@6"
                 }
             ]
         }

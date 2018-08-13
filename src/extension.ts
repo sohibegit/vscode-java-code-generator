@@ -31,11 +31,17 @@ export function activate(context: vscode.ExtensionContext) {
         insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, classNameFirstLower));
     });
 
+    let generateFluentSettersCommand = vscode.commands.registerCommand('extension.javaGenerateFluentSetters', () => {
+        let className = getClassName(vscode.window.activeTextEditor!.document.getText());
+        insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className));
+    });
+
     context.subscriptions.push(generateSettersGettersCommand);
     context.subscriptions.push(generateToStringCommand);
     context.subscriptions.push(generateConstructorCommand);
     context.subscriptions.push(generateConstructorUsingFieldsCommand);
     context.subscriptions.push(generateHashCodeAndEqualsCommand);
+    context.subscriptions.push(generateFluentSettersCommand);
 }
 
 
@@ -125,5 +131,16 @@ export function generateHashCodeAndEquals(declerations: Decleration[], className
     result = result.slice(0, -2) + `);\n`;
 
     result += `\t}\n`;
+    return result;
+}
+
+function generateFluentSetters(declerations: Decleration[], className: string): string {
+    let result = '';
+    declerations.forEach(it => {
+        result += `\n\tpublic ${className} ${it.variableName}(${it.variableType} ${it.variableName}) {
+\t\tthis.${it.variableName} = ${it.variableName};
+\t\treturn this;
+\t}\n`;
+    });
     return result;
 }
