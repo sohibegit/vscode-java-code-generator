@@ -32,7 +32,10 @@
   ],
   "main": "./out/extension",
   "contributes": {
-    "commands": [
+    "commands": [{
+        "command": "extension.javaGenerateGetters",
+        "title": "Java: Generate Getters"
+      },
       {
         "command": "extension.javaGenerateSettersGetters",
         "title": "Java: Generate Setters and Getters"
@@ -59,36 +62,40 @@
       }
     ],
     "menus": {
-      "editor/context": [
-        {
+      "editor/context": [{
           "when": "resourceLangId == java",
-          "command": "extension.javaGenerateSettersGetters",
+          "command": "extension.javaGenerateGetters",
           "group": "YourGroup@1"
         },
         {
           "when": "resourceLangId == java",
-          "command": "extension.javaGenerateToString",
+          "command": "extension.javaGenerateSettersGetters",
           "group": "YourGroup@2"
         },
         {
           "when": "resourceLangId == java",
-          "command": "extension.javaGenerateConstructor",
+          "command": "extension.javaGenerateToString",
           "group": "YourGroup@3"
         },
         {
           "when": "resourceLangId == java",
-          "command": "extension.javaGenerateConstructorUsingFields",
+          "command": "extension.javaGenerateConstructor",
           "group": "YourGroup@4"
         },
         {
           "when": "resourceLangId == java",
-          "command": "extension.javaGenerateHashCodeAndEquals",
+          "command": "extension.javaGenerateConstructorUsingFields",
           "group": "YourGroup@5"
         },
         {
           "when": "resourceLangId == java",
-          "command": "extension.javaGenerateFluentSetters",
+          "command": "extension.javaGenerateHashCodeAndEquals",
           "group": "YourGroup@6"
+        },
+        {
+          "when": "resourceLangId == java",
+          "command": "extension.javaGenerateFluentSetters",
+          "group": "YourGroup@7"
         }
       ]
     }
