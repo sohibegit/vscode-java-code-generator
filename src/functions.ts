@@ -68,17 +68,43 @@ export function lowerCaseFirstLetter(string: string) {
   return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
-export function getClassName(classFile: string): string {
-  let regex = /(class|interface|enum)\s([^\n\s]*)/;
-  //  console.log(regex.exec(classFile));
-  let classDecleration = regex.exec(classFile);
-  if (classDecleration) {
-    return classDecleration[2];
-  } else {
+export async function getClassName(classFile: string): Promise<string> {
+  let regex = /(class|interface|enum)\s([^\n\s]*)/g;
+  //  console.log(classFile.match(regex));
+
+  let items: vscode.QuickPickItem[] = [];
+
+  let arrayOfClass = classFile.match(regex);
+  if (!arrayOfClass || arrayOfClass.length < 1) {
     vscode.window.showErrorMessage(
       "couldn't parse the class name please file an issue"
     );
-    throw new Error("couldn't parse the class name please file an issue");
+    return Promise.reject("couldn't parse the class name please file an issue");
+  } else if (arrayOfClass.length === 1) {
+    return arrayOfClass[0].split(" ")[1];
+  } else {
+    arrayOfClass!.forEach(match => {
+      items.push({
+        label: match.split(" ")[1],
+        detail: match.split(" ")[0]
+      });
+    });
+    let classDecleration = await vscode.window.showQuickPick(items, {
+      canPickMany: false,
+      placeHolder: "please pick..."
+    });
+
+    if (classDecleration) {
+      return classDecleration.label;
+    }
+    {
+      vscode.window.showErrorMessage(
+        "couldn't parse the class name please file an issue"
+      );
+      return Promise.reject(
+        "couldn't parse the class name please file an issue"
+      );
+    }
   }
 }
 

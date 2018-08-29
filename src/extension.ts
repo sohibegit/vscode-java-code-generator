@@ -34,25 +34,27 @@ export function activate(context: vscode.ExtensionContext) {
   let generateConstructorCommand = vscode.commands.registerCommand(
     "extension.javaGenerateConstructor",
     () => {
-      let className = getClassName(
-        vscode.window.activeTextEditor!.document.getText()
+      getClassName(vscode.window.activeTextEditor!.document.getText()).then(
+        className => {
+          let result = `\n\tpublic ${className}() {\n\t}\n`;
+          insertSnippet(result);
+        }
       );
-      let result = `\n\tpublic ${className}() {\n\t}\n`;
-      insertSnippet(result);
     }
   );
 
   let generateConstructorUsingFieldsCommand = vscode.commands.registerCommand(
     "extension.javaGenerateConstructorUsingFields",
     () => {
-      let className = getClassName(
-        vscode.window.activeTextEditor!.document.getText()
-      );
-      insertSnippet(
-        generateConstructorUsingFields(
-          getDeclerations(getSelectedText()),
-          className
-        )
+      getClassName(vscode.window.activeTextEditor!.document.getText()).then(
+        className => {
+          insertSnippet(
+            generateConstructorUsingFields(
+              getDeclerations(getSelectedText()),
+              className
+            )
+          );
+        }
       );
     }
   );
@@ -60,16 +62,17 @@ export function activate(context: vscode.ExtensionContext) {
   let generateHashCodeAndEqualsCommand = vscode.commands.registerCommand(
     "extension.javaGenerateHashCodeAndEquals",
     () => {
-      let className = getClassName(
-        vscode.window.activeTextEditor!.document.getText()
-      );
-      let classNameFirstLower = lowerCaseFirstLetter(className);
-      insertSnippet(
-        generateHashCodeAndEquals(
-          getDeclerations(getSelectedText()),
-          className,
-          classNameFirstLower
-        )
+      getClassName(vscode.window.activeTextEditor!.document.getText()).then(
+        className => {
+          let classNameFirstLower = lowerCaseFirstLetter(className);
+          insertSnippet(
+            generateHashCodeAndEquals(
+              getDeclerations(getSelectedText()),
+              className,
+              classNameFirstLower
+            )
+          );
+        }
       );
     }
   );
@@ -77,11 +80,12 @@ export function activate(context: vscode.ExtensionContext) {
   let generateFluentSettersCommand = vscode.commands.registerCommand(
     "extension.javaGenerateFluentSetters",
     () => {
-      let className = getClassName(
-        vscode.window.activeTextEditor!.document.getText()
-      );
-      insertSnippet(
-        generateFluentSetters(getDeclerations(getSelectedText()), className)
+      getClassName(vscode.window.activeTextEditor!.document.getText()).then(
+        className => {
+          insertSnippet(
+            generateFluentSetters(getDeclerations(getSelectedText()), className)
+          );
+        }
       );
     }
   );

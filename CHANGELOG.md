@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.2.1] - 2018-08-29
+
+### Added
+
+- add support for multiple classes,enums and interfaces in the same file
+
 ## [3.2.0] - 2018-08-29
 
 ### Added
