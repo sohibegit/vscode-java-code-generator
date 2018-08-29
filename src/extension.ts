@@ -10,6 +10,13 @@ import {
 import { Decleration } from "./decleration";
 
 export function activate(context: vscode.ExtensionContext) {
+  let generateGettersCommand = vscode.commands.registerCommand(
+    "extension.javaGenerateGetters",
+    () => {
+      insertSnippet(generateGetters(getDeclerations(getSelectedText())));
+    }
+  );
+
   let generateSettersGettersCommand = vscode.commands.registerCommand(
     "extension.javaGenerateSettersGetters",
     () => {
@@ -79,6 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  context.subscriptions.push(generateGettersCommand);
   context.subscriptions.push(generateSettersGettersCommand);
   context.subscriptions.push(generateToStringCommand);
   context.subscriptions.push(generateConstructorCommand);
@@ -88,6 +96,18 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+function generateGetters(declerations: Decleration[]): string {
+  let result = "";
+  declerations.forEach(it => {
+    result += `\n\tpublic ${it.variableType} get${
+      it.variableNameFirstCapital
+    }() {
+\t\treturn this.${it.variableName};
+\t}\n`;
+  });
+  return result;
+}
 
 function generateSetterGetters(declerations: Decleration[]): string {
   let result = "";
