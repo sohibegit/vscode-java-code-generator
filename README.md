@@ -17,6 +17,12 @@
 
 none
 
+## [3.2.0] - 2018-08-29
+
+### Added
+
+- Generate Getters (only)
+
 ## Release Notes
 
 ## [3.1.0] - 2018-08-13
@@ -25,12 +31,6 @@ none
 
 - Generate Fluent Setters
 
-## [3.0.0] - 2018-08-04
-
-### Added
-
-- generate Equals And HashCode
-
------------------------------------------------------------------------------------------------------------
+---
 
 **Enjoy!**

@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.2.0] - 2018-08-29
+
+### Added
+
+- Generate Getters (only)
+
 ## [3.1.0] - 2018-08-13
 
 ### Added
