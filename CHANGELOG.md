@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.2.2] - 2018-09-04
+
+### Added
+
+- add setting to include Fluent Setters with Java: Generate Setters and Getters
+
 ## [3.2.1] - 2018-08-29
 
 ### Added

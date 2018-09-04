@@ -20,7 +20,12 @@ export function activate(context: vscode.ExtensionContext) {
   let generateSettersGettersCommand = vscode.commands.registerCommand(
     "extension.javaGenerateSettersGetters",
     () => {
-      insertSnippet(generateSetterGetters(getDeclerations(getSelectedText())));
+      getClassName(vscode.window.activeTextEditor!.document.getText()).then(
+        className =>
+          insertSnippet(
+            generateSetterGetters(className, getDeclerations(getSelectedText()))
+          )
+      );
     }
   );
 
@@ -81,11 +86,10 @@ export function activate(context: vscode.ExtensionContext) {
     "extension.javaGenerateFluentSetters",
     () => {
       getClassName(vscode.window.activeTextEditor!.document.getText()).then(
-        className => {
+        className =>
           insertSnippet(
             generateFluentSetters(getDeclerations(getSelectedText()), className)
-          );
-        }
+          )
       );
     }
   );
@@ -113,7 +117,10 @@ function generateGetters(declerations: Decleration[]): string {
   return result;
 }
 
-function generateSetterGetters(declerations: Decleration[]): string {
+function generateSetterGetters(
+  className: string,
+  declerations: Decleration[]
+): string {
   let result = "";
   declerations.forEach(it => {
     result += `\n\tpublic ${it.variableType} get${
@@ -128,6 +135,25 @@ function generateSetterGetters(declerations: Decleration[]): string {
 \t\tthis.${it.variableName} = ${it.variableName};
 \t}\n`;
   });
+
+  if (
+    vscode.workspace
+      .getConfiguration("java.code.generators")
+      .has("includeFluentWithSettersGetters") &&
+    vscode.workspace
+      .getConfiguration("java.code.generators")
+      .get("includeFluentWithSettersGetters")
+  ) {
+    declerations.forEach(it => {
+      result += `\n\tpublic ${className} ${it.variableName}(${
+        it.variableType
+      } ${it.variableName}) {
+\t\tthis.${it.variableName} = ${it.variableName};
+\t\treturn this;
+\t}\n`;
+    });
+  }
+
   return result;
 }
 

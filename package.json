@@ -2,7 +2,7 @@
   "name": "java-generate-setters-getters",
   "displayName": "Java Code Generators",
   "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "publisher": "sohibe",
   "keywords": [
     "java",
@@ -101,7 +101,19 @@
           "group": "YourGroup@7"
         }
       ]
-    }
+    },
+    "configuration": [
+      {
+        "title": "Java Code Generator Configurations",
+        "properties": {
+          "java.code.generators.includeFluentWithSettersGetters": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include Fluent Setters with Java: Generate Setters and Getters"
+          }
+        }
+      }
+    ]
   },
   "icon": "images/icon.png",
   "scripts": {
