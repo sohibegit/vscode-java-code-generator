@@ -8,8 +8,46 @@ import {
   lowerCaseFirstLetter
 } from "./functions";
 import { Decleration } from "./decleration";
+import {
+  isIncludeFluentWithSettersGetters,
+  getMethodOpeningBraceOnNewLine
+} from "./settings";
 
 export function activate(context: vscode.ExtensionContext) {
+  let generateAll = vscode.commands.registerCommand(
+    "extension.javaGenerateAll",
+    () => {
+      getClassName(vscode.window.activeTextEditor!.document.getText()).then(
+        className => {
+          insertSnippet(generateToString(getDeclerations(getSelectedText())));
+
+          insertSnippet(
+            generateHashCodeAndEquals(
+              getDeclerations(getSelectedText()),
+              className,
+              lowerCaseFirstLetter(className)
+            )
+          );
+
+          insertSnippet(
+            generateFluentSetters(getDeclerations(getSelectedText()), className)
+          );
+
+          insertSnippet(
+            generateSetterGetters(className, getDeclerations(getSelectedText()))
+          );
+
+          insertSnippet(
+            generateConstructorUsingFields(
+              getDeclerations(getSelectedText()),
+              className
+            )
+          );
+        }
+      );
+    }
+  );
+
   let generateGettersCommand = vscode.commands.registerCommand(
     "extension.javaGenerateGetters",
     () => {
@@ -41,7 +79,7 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       getClassName(vscode.window.activeTextEditor!.document.getText()).then(
         className => {
-          let result = `\n\tpublic ${className}() {\n\t}\n`;
+          let result = `\n\tpublic ${className}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
           insertSnippet(result);
         }
       );
@@ -69,12 +107,11 @@ export function activate(context: vscode.ExtensionContext) {
     () => {
       getClassName(vscode.window.activeTextEditor!.document.getText()).then(
         className => {
-          let classNameFirstLower = lowerCaseFirstLetter(className);
           insertSnippet(
             generateHashCodeAndEquals(
               getDeclerations(getSelectedText()),
               className,
-              classNameFirstLower
+              lowerCaseFirstLetter(className)
             )
           );
         }
@@ -94,6 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  context.subscriptions.push(generateAll);
   context.subscriptions.push(generateGettersCommand);
   context.subscriptions.push(generateSettersGettersCommand);
   context.subscriptions.push(generateToStringCommand);
@@ -110,7 +148,7 @@ function generateGetters(declerations: Decleration[]): string {
   declerations.forEach(it => {
     result += `\n\tpublic ${it.variableType} get${
       it.variableNameFirstCapital
-    }() {
+    }() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n`;
   });
@@ -125,29 +163,24 @@ function generateSetterGetters(
   declerations.forEach(it => {
     result += `\n\tpublic ${it.variableType} get${
       it.variableNameFirstCapital
-    }() {
+    }() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}
 
 \tpublic void ${it.variableType!.toLowerCase() === "boolean" ? "is" : "set"}${
       it.variableNameFirstCapital
-    }(${it.variableType} ${it.variableName}) {
+    }(${it.variableType} ${
+      it.variableName
+    }) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t}\n`;
   });
 
-  if (
-    vscode.workspace
-      .getConfiguration("java.code.generators")
-      .has("includeFluentWithSettersGetters") &&
-    vscode.workspace
-      .getConfiguration("java.code.generators")
-      .get("includeFluentWithSettersGetters")
-  ) {
+  if (isIncludeFluentWithSettersGetters()) {
     declerations.forEach(it => {
       result += `\n\tpublic ${className} ${it.variableName}(${
         it.variableType
-      } ${it.variableName}) {
+      } ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;
@@ -159,7 +192,7 @@ function generateSetterGetters(
 
 export function generateToString(declerations: Decleration[]): string {
   let result = `\n\t@Override
-\tpublic String toString() {
+\tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn "{" +\n`;
 
   declerations.forEach(it => {
@@ -182,7 +215,7 @@ export function generateConstructorUsingFields(
   declerations.forEach(it => {
     result += `${it.variableType} ${it.variableName}, `;
   });
-  result = result.slice(0, -2) + `) {\n`;
+  result = result.slice(0, -2) + `) ${getMethodOpeningBraceOnNewLine()}{\n`;
   declerations.forEach(it => {
     result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
   });
@@ -196,7 +229,7 @@ export function generateHashCodeAndEquals(
   classNameFirstLower: string
 ): string {
   let result = `\n\t@Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o) ${getMethodOpeningBraceOnNewLine()}{
         if (o == this)
             return true;
         if (!(o instanceof ${className})) {
@@ -219,7 +252,7 @@ export function generateHashCodeAndEquals(
   result = result.slice(0, -4) + `;\n\t}`;
 
   result += `\n\n\t@Override
-\tpublic int hashCode() {\n`;
+\tpublic int hashCode() ${getMethodOpeningBraceOnNewLine()}{\n`;
   if (declerations.length > 1) {
     result += `\t\treturn Objects.hash(`;
   } else {
@@ -243,7 +276,7 @@ function generateFluentSetters(
   declerations.forEach(it => {
     result += `\n\tpublic ${className} ${it.variableName}(${it.variableType} ${
       it.variableName
-    }) {
+    }) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;

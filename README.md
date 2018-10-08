@@ -17,19 +17,24 @@
 
 none
 
+## Release Notes
+
+## [3.3.0] - 2018-10-08
+
+### Added
+
+- Generate All
+- Option to put the method's opening brace on a new line instead of the same line "java.code.generators.methodOpeningBraceOnNewLine"
+
+### Fixed
+
+- selecting any variable marked as protected result in 'undefined'
+
 ## [3.2.0] - 2018-08-29
 
 ### Added
 
 - Generate Getters (only)
-
-## Release Notes
-
-## [3.1.0] - 2018-08-13
-
-### Added
-
-- Generate Fluent Setters
 
 ---
 

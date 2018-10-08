@@ -20,6 +20,7 @@ export function getDeclerations(slectedText: string): Decleration[] {
       .replace("final ", " ")
       .replace("public ", " ")
       .replace("private ", " ")
+      .replace("protected ", " ")
       .trim()
       .split(" ");
     let variableType,

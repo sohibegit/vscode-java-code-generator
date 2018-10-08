@@ -2,7 +2,7 @@
   "name": "java-generate-setters-getters",
   "displayName": "Java Code Generators",
   "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "publisher": "sohibe",
   "keywords": [
     "java",
@@ -29,7 +29,8 @@
     "onCommand:extension.javaGenerateConstructor",
     "onCommand:extension.javaGenerateConstructorUsingFields",
     "onCommand:extension.javaGenerateHashCodeAndEquals",
-    "onCommand:extension.javaGenerateFluentSetters"
+    "onCommand:extension.javaGenerateFluentSetters",
+    "onCommand:extension.javaGenerateAll"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -61,6 +62,10 @@
       {
         "command": "extension.javaGenerateFluentSetters",
         "title": "Java: Generate Fluent Setters"
+      },
+      {
+        "command": "extension.javaGenerateAll",
+        "title": "Java: Generate All"
       }
     ],
     "menus": {
@@ -99,6 +104,11 @@
           "when": "resourceLangId == java",
           "command": "extension.javaGenerateFluentSetters",
           "group": "YourGroup@7"
+        },
+        {
+          "when": "resourceLangId == java",
+          "command": "extension.javaGenerateAll",
+          "group": "YourGroup@8"
         }
       ]
     },
@@ -110,6 +120,11 @@
             "type": "boolean",
             "default": false,
             "description": "Include Fluent Setters with Java: Generate Setters and Getters"
+          },
+          "java.code.generators.methodOpeningBraceOnNewLine": {
+            "type": "boolean",
+            "default": false,
+            "description": "Option to put the method's opening brace on a new line instead of the same line"
           }
         }
       }
