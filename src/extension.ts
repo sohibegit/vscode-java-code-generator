@@ -194,9 +194,9 @@ export function generateToString(declerations: Decleration[]): string {
 \t\treturn "{" +\n`;
 
   declerations.forEach(it => {
-    result += `\t\t\t", ${it.variableName}='" + get${
-      it.variableNameFirstCapital
-    }() + "'" +\n`;
+    result += `\t\t\t", ${it.variableName}='" + ${
+      it.variableType.toLowerCase() === "boolean" ? "is" : "get"
+    }${it.variableNameFirstCapital}() + "'" +\n`;
   });
 
   result += `\t\t\t"}";
