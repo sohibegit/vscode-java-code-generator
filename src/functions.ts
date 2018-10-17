@@ -22,7 +22,8 @@ export function getDeclerations(slectedText: string): Decleration[] {
       .replace("private ", " ")
       .replace("protected ", " ")
       .trim()
-      .split(" ");
+      .split(" ")
+      .filter(String);
     let variableType,
       variableName,
       variableNameFirstCapital: string = "";
