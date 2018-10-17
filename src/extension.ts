@@ -161,15 +161,13 @@ function generateSetterGetters(
 ): string {
   let result = "";
   declerations.forEach(it => {
-    result += `\n\tpublic ${it.variableType} get${
-      it.variableNameFirstCapital
-    }() ${getMethodOpeningBraceOnNewLine()}{
+    result += `\n\tpublic ${it.variableType} ${
+      it.variableType.toLowerCase() === "boolean" ? "is" : "get"
+    }${it.variableNameFirstCapital}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}
 
-\tpublic void ${it.variableType!.toLowerCase() === "boolean" ? "is" : "set"}${
-      it.variableNameFirstCapital
-    }(${it.variableType} ${
+\tpublic void set${it.variableNameFirstCapital}(${it.variableType} ${
       it.variableName
     }) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};

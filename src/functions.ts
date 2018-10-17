@@ -24,9 +24,9 @@ export function getDeclerations(slectedText: string): Decleration[] {
       .trim()
       .split(" ")
       .filter(String);
-    let variableType,
-      variableName,
-      variableNameFirstCapital: string = "";
+    let variableType = "";
+    let variableName = "";
+    let variableNameFirstCapital = "";
     let skip = false;
 
     if (declaration[0].charAt(0) === "@" || declaration[0].charAt(0) === "/") {
