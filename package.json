@@ -1,148 +1,159 @@
 {
-  "name": "java-generate-setters-getters",
-  "displayName": "Java Code Generators",
-  "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
-  "version": "3.3.3",
-  "publisher": "sohibe",
-  "keywords": [
-    "java",
-    "setter",
-    "getter",
-    "constructor",
-    "toString"
-  ],
-  "engines": {
-    "vscode": "^1.23.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sohibegit/vscode-java-code-generator"
-  },
-  "categories": [
-    "Programming Languages",
-    "Snippets"
-  ],
-  "activationEvents": [
-    "onCommand:extension.javaGenerateGetters",
-    "onCommand:extension.javaGenerateSettersGetters",
-    "onCommand:extension.javaGenerateToString",
-    "onCommand:extension.javaGenerateConstructor",
-    "onCommand:extension.javaGenerateConstructorUsingFields",
-    "onCommand:extension.javaGenerateHashCodeAndEquals",
-    "onCommand:extension.javaGenerateFluentSetters",
-    "onCommand:extension.javaGenerateAll"
-  ],
-  "main": "./out/extension",
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.javaGenerateGetters",
-        "title": "Java: Generate Getters"
-      },
-      {
-        "command": "extension.javaGenerateSettersGetters",
-        "title": "Java: Generate Setters and Getters"
-      },
-      {
-        "command": "extension.javaGenerateToString",
-        "title": "Java: Generate toString()"
-      },
-      {
-        "command": "extension.javaGenerateConstructor",
-        "title": "Java: Generate Constructor"
-      },
-      {
-        "command": "extension.javaGenerateConstructorUsingFields",
-        "title": "Java: Generate Constructor Using Fields"
-      },
-      {
-        "command": "extension.javaGenerateHashCodeAndEquals",
-        "title": "Java: Generate HashCode And Equals"
-      },
-      {
-        "command": "extension.javaGenerateFluentSetters",
-        "title": "Java: Generate Fluent Setters"
-      },
-      {
-        "command": "extension.javaGenerateAll",
-        "title": "Java: Generate All"
-      }
+    "name": "java-generate-setters-getters",
+    "displayName": "Java Code Generators",
+    "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
+    "version": "3.3.3",
+    "publisher": "sohibe",
+    "keywords": [
+        "java",
+        "setter",
+        "getter",
+        "constructor",
+        "toString"
     ],
-    "menus": {
-      "editor/context": [
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateGetters",
-          "group": "YourGroup@1"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateSettersGetters",
-          "group": "YourGroup@2"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateToString",
-          "group": "YourGroup@3"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateConstructor",
-          "group": "YourGroup@4"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateConstructorUsingFields",
-          "group": "YourGroup@5"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateHashCodeAndEquals",
-          "group": "YourGroup@6"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateFluentSetters",
-          "group": "YourGroup@7"
-        },
-        {
-          "when": "resourceLangId == java",
-          "command": "extension.javaGenerateAll",
-          "group": "YourGroup@8"
-        }
-      ]
+    "engines": {
+        "vscode": "^1.23.0"
     },
-    "configuration": [
-      {
-        "title": "Java Code Generator Configurations",
-        "properties": {
-          "java.code.generators.includeFluentWithSettersGetters": {
-            "type": "boolean",
-            "default": false,
-            "description": "Include Fluent Setters with Java: Generate Setters and Getters"
-          },
-          "java.code.generators.methodOpeningBraceOnNewLine": {
-            "type": "boolean",
-            "default": false,
-            "description": "Option to put the method's opening brace on a new line instead of the same line"
-          }
-        }
-      }
-    ]
-  },
-  "icon": "images/icon.png",
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test"
-  },
-  "devDependencies": {
-    "typescript": "^2.6.1",
-    "vscode": "^1.1.6",
-    "tslint": "^5.8.0",
-    "@types/node": "^7.0.43",
-    "@types/mocha": "^2.2.42"
-  }
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/sohibegit/vscode-java-code-generator"
+    },
+    "categories": [
+        "Programming Languages",
+        "Snippets"
+    ],
+    "activationEvents": [
+        "onCommand:extension.javaGenerateGetters",
+        "onCommand:extension.javaGenerateSettersGetters",
+        "onCommand:extension.javaGenerateToString",
+        "onCommand:extension.javaGenerateConstructor",
+        "onCommand:extension.javaGenerateConstructorUsingFields",
+        "onCommand:extension.javaGenerateHashCodeAndEquals",
+        "onCommand:extension.javaGenerateFluentSetters",
+        "onCommand:extension.javaGenerateAll"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "extension.javaGenerateGetters",
+                "title": "Java: Generate Getters"
+            },
+            {
+                "command": "extension.javaGenerateSettersGetters",
+                "title": "Java: Generate Setters and Getters"
+            },
+            {
+                "command": "extension.javaGenerateToString",
+                "title": "Java: Generate toString()"
+            },
+            {
+                "command": "extension.javaGenerateConstructor",
+                "title": "Java: Generate Constructor"
+            },
+            {
+                "command": "extension.javaGenerateConstructorUsingFields",
+                "title": "Java: Generate Constructor Using Fields"
+            },
+            {
+                "command": "extension.javaGenerateHashCodeAndEquals",
+                "title": "Java: Generate HashCode And Equals"
+            },
+            {
+                "command": "extension.javaGenerateFluentSetters",
+                "title": "Java: Generate Fluent Setters"
+            },
+            {
+                "command": "extension.javaGenerateAll",
+                "title": "Java: Generate All"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateGetters",
+                    "group": "YourGroup@1"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateSettersGetters",
+                    "group": "YourGroup@2"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateToString",
+                    "group": "YourGroup@3"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateConstructor",
+                    "group": "YourGroup@4"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateConstructorUsingFields",
+                    "group": "YourGroup@5"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateHashCodeAndEquals",
+                    "group": "YourGroup@6"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateFluentSetters",
+                    "group": "YourGroup@7"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateAll",
+                    "group": "YourGroup@8"
+                }
+            ]
+        },
+        "configuration": [
+            {
+                "title": "Java Code Generator Configurations",
+                "properties": {
+                    "java.code.generators.includeFluentWithSettersGetters": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Include Fluent Setters with Java: Generate Setters and Getters"
+                    },
+                    "java.code.generators.methodOpeningBraceOnNewLine": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Option to put the method's opening brace on a new line instead of the same line"
+                    }
+                }
+            }
+        ]
+    },
+    "icon": "images/icon.png",
+    "lint-staged": {
+        "src/**/*.ts": [
+            "npm run prettier",
+            "git add"
+        ]
+    },
+    "scripts": {
+        "prettier": "prettier --write \"src/**/*.ts\"",
+        "precommit": "lint-staged",
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "husky": "^1.1.2",
+        "lint-staged": "^7.3.0",
+        "prettier": "^1.14.3",
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.21"
+    }
 }
