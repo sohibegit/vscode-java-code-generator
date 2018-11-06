@@ -29,7 +29,7 @@ export function getDeclerations(slectedText: string): Decleration[] {
         let variableNameFirstCapital = '';
         let skip = false;
 
-        if (declaration[0].charAt(0) === '@' || declaration[0].charAt(0) === '/') {
+        if ('$/*@'.includes(declaration[0].charAt(0))) {
             continue;
         }
 
