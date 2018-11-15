@@ -131,15 +131,8 @@
         ]
     },
     "icon": "images/icon.png",
-    "lint-staged": {
-        "src/**/*.ts": [
-            "npm run prettier",
-            "git add"
-        ]
-    },
     "scripts": {
         "prettier": "prettier --write \"src/**/*.ts\"",
-        "precommit": "lint-staged",
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
@@ -149,11 +142,15 @@
     "devDependencies": {
         "@types/mocha": "^2.2.42",
         "@types/node": "^7.0.43",
-        "husky": "^1.1.2",
-        "lint-staged": "^7.3.0",
-        "prettier": "^1.14.3",
-        "tslint": "^5.8.0",
+        "husky": "1.1.4",
+        "prettier": "1.15.2",
+        "tslint": "5.11.0",
         "typescript": "^2.6.1",
         "vscode": "^1.1.21"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "prettier --write \"src/**/*.ts\""
+        }
     }
 }

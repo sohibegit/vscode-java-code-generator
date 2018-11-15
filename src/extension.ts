@@ -6,19 +6,23 @@ import { isIncludeFluentWithSettersGetters, getMethodOpeningBraceOnNewLine } fro
 
 export function activate(context: vscode.ExtensionContext) {
     let generateAll = vscode.commands.registerCommand('extension.javaGenerateAll', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText()).then(className => {
-            insertSnippet(generateToString(getDeclerations(getSelectedText())));
+        getClassName(vscode.window.activeTextEditor!.document.getText())
+            .then(className => {
+                insertSnippet(generateToString(getDeclerations(getSelectedText())));
 
-            insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, lowerCaseFirstLetter(className)));
+                insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, lowerCaseFirstLetter(className)));
 
-            if (!isIncludeFluentWithSettersGetters()) {
-                insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className));
-            }
+                if (!isIncludeFluentWithSettersGetters()) {
+                    insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className));
+                }
 
-            insertSnippet(generateSetterGetters(className, getDeclerations(getSelectedText())));
+                insertSnippet(generateSetterGetters(className, getDeclerations(getSelectedText())));
 
-            insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
-        });
+                insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
+            })
+            .catch(err => {
+                console.error(err);
+            });
     });
 
     let generateGettersCommand = vscode.commands.registerCommand('extension.javaGenerateGetters', () => {
@@ -26,7 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     let generateSettersGettersCommand = vscode.commands.registerCommand('extension.javaGenerateSettersGetters', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText()).then(className => insertSnippet(generateSetterGetters(className, getDeclerations(getSelectedText()))));
+        getClassName(vscode.window.activeTextEditor!.document.getText())
+            .then(className => insertSnippet(generateSetterGetters(className, getDeclerations(getSelectedText()))))
+            .catch(err => {
+                console.error(err);
+            });
     });
 
     let generateToStringCommand = vscode.commands.registerCommand('extension.javaGenerateToString', () => {
@@ -34,26 +42,42 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     let generateConstructorCommand = vscode.commands.registerCommand('extension.javaGenerateConstructor', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText()).then(className => {
-            let result = `\n\tpublic ${className}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
-            insertSnippet(result);
-        });
+        getClassName(vscode.window.activeTextEditor!.document.getText())
+            .then(className => {
+                let result = `\n\tpublic ${className}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
+                insertSnippet(result);
+            })
+            .catch(err => {
+                console.error(err);
+            });
     });
 
     let generateConstructorUsingFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingFields', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText()).then(className => {
-            insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
-        });
+        getClassName(vscode.window.activeTextEditor!.document.getText())
+            .then(className => {
+                insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
+            })
+            .catch(err => {
+                console.error(err);
+            });
     });
 
     let generateHashCodeAndEqualsCommand = vscode.commands.registerCommand('extension.javaGenerateHashCodeAndEquals', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText()).then(className => {
-            insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, lowerCaseFirstLetter(className)));
-        });
+        getClassName(vscode.window.activeTextEditor!.document.getText())
+            .then(className => {
+                insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, lowerCaseFirstLetter(className)));
+            })
+            .catch(err => {
+                console.error(err);
+            });
     });
 
     let generateFluentSettersCommand = vscode.commands.registerCommand('extension.javaGenerateFluentSetters', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText()).then(className => insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className)));
+        getClassName(vscode.window.activeTextEditor!.document.getText())
+            .then(className => insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className)))
+            .catch(err => {
+                console.error(err);
+            });
     });
 
     context.subscriptions.push(generateAll);
