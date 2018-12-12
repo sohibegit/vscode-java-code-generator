@@ -10,7 +10,7 @@ export function getMethodOpeningBraceOnNewLine(): string {
     return '';
 }
 
-export function isIncludeFluentWithSettersGetters(): boolean | undefined {
+export function isIncludeFluentWithSetters(): boolean | undefined {
     return (
         vscode.workspace.getConfiguration('java.code.generators').has('includeFluentWithSettersGetters') &&
         vscode.workspace.getConfiguration('java.code.generators').get('includeFluentWithSettersGetters')

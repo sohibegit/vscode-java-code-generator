@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
 import { JavaClass } from './java-class';
-import { getMethodOpeningBraceOnNewLine, isIncludeFluentWithSettersGetters, isGenertaeEvenIfExists } from './settings';
+import { getMethodOpeningBraceOnNewLine, isIncludeFluentWithSetters, isGenertaeEvenIfExists } from './settings';
 import { getGuiHtml } from './gui';
 let existsWarnings: string[] = [];
 export function activate(context: vscode.ExtensionContext) {
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
                 result += generateEmptyConstrucor(javaClass);
                 result += generateConstructorUsingFields(javaClass);
                 result += generateGettersAndSetter(javaClass);
-                if (!isIncludeFluentWithSettersGetters()) {
+                if (!isIncludeFluentWithSetters()) {
                     result += generateFluentSetters(javaClass);
                 }
                 result += generateHashCodeAndEquals(javaClass);
@@ -95,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 result += generateEmptyConstrucor(javaClass);
                                 result += generateConstructorUsingFields(javaClass);
                                 result += generateGettersAndSetter(javaClass);
-                                if (!isIncludeFluentWithSettersGetters()) {
+                                if (!isIncludeFluentWithSetters()) {
                                     result += generateFluentSetters(javaClass);
                                 }
                                 result += generateHashCodeAndEquals(javaClass);
@@ -164,18 +164,20 @@ function generateGettersAndSetter(javaClass: JavaClass): string {
 \t\treturn this.${it.variableName};
 \t}\n\n`;
         }
-        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`set${it.variableNameFirstCapital()}`) === -1) {
-            result += `\tpublic void set${it.variableNameFirstCapital()}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+        if (!it.isFinal) {
+            if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`set${it.variableNameFirstCapital()}`) === -1) {
+                result += `\tpublic void set${it.variableNameFirstCapital()}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t}\n`;
-        }
+            }
 
-        if (isIncludeFluentWithSettersGetters()) {
-            if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
-                result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+            if (isIncludeFluentWithSetters()) {
+                if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
+                    result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;
+                }
             }
         }
     });
@@ -187,10 +189,12 @@ function generateFluentSetters(javaClass: JavaClass): string {
     let result = '';
     javaClass.declerations.forEach(it => {
         if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
-            result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+            if (!it.isFinal) {
+                result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;
+            }
         }
     });
     return result;
