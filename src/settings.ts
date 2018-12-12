@@ -16,3 +16,10 @@ export function isIncludeFluentWithSettersGetters(): boolean | undefined {
         vscode.workspace.getConfiguration('java.code.generators').get('includeFluentWithSettersGetters')
     );
 }
+
+export function isGenertaeEvenIfExists(): boolean | undefined {
+    return (
+        vscode.workspace.getConfiguration('java.code.generators').has('genertaeEvenIfExists') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('genertaeEvenIfExists')
+    );
+}

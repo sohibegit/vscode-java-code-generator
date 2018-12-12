@@ -4,6 +4,7 @@
     "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
     "version": "3.3.7",
     "publisher": "sohibe",
+    "license": "MIT",
     "keywords": [
         "java",
         "setter",
@@ -23,92 +24,52 @@
         "Snippets"
     ],
     "activationEvents": [
-        "onCommand:extension.javaGenerateGetters",
-        "onCommand:extension.javaGenerateSettersGetters",
-        "onCommand:extension.javaGenerateToString",
         "onCommand:extension.javaGenerateConstructor",
-        "onCommand:extension.javaGenerateConstructorUsingFields",
-        "onCommand:extension.javaGenerateHashCodeAndEquals",
-        "onCommand:extension.javaGenerateFluentSetters",
-        "onCommand:extension.javaGenerateAll"
+        "onCommand:extension.javaGenerateConstructorUsingAllFinalFields",
+        "onCommand:extension.javaGenerateAll",
+        "onCommand:extension.javaGenerateUsingGui"
     ],
     "main": "./out/extension",
     "contributes": {
         "commands": [
             {
-                "command": "extension.javaGenerateGetters",
-                "title": "Java: Generate Getters"
-            },
-            {
-                "command": "extension.javaGenerateSettersGetters",
-                "title": "Java: Generate Setters and Getters"
-            },
-            {
-                "command": "extension.javaGenerateToString",
-                "title": "Java: Generate toString()"
-            },
-            {
                 "command": "extension.javaGenerateConstructor",
-                "title": "Java: Generate Constructor"
+                "title": "Java: Generate empty constructor"
             },
             {
-                "command": "extension.javaGenerateConstructorUsingFields",
-                "title": "Java: Generate Constructor Using Fields"
-            },
-            {
-                "command": "extension.javaGenerateHashCodeAndEquals",
-                "title": "Java: Generate HashCode And Equals"
-            },
-            {
-                "command": "extension.javaGenerateFluentSetters",
-                "title": "Java: Generate Fluent Setters"
+                "command": "extension.javaGenerateConstructorUsingAllFinalFields",
+                "title": "Java: Generate constructor using all final fields"
             },
             {
                 "command": "extension.javaGenerateAll",
-                "title": "Java: Generate All"
+                "title": "Java: Generate all \"Quick\""
+            },
+            {
+                "command": "extension.javaGenerateUsingGui",
+                "title": "Java: Generator GUI"
             }
         ],
         "menus": {
             "editor/context": [
                 {
                     "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateGetters",
+                    "command": "extension.javaGenerateConstructor",
                     "group": "YourGroup@1"
                 },
                 {
                     "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateSettersGetters",
+                    "command": "extension.javaGenerateConstructorUsingAllFinalFields",
                     "group": "YourGroup@2"
                 },
                 {
                     "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateToString",
+                    "command": "extension.javaGenerateAll",
                     "group": "YourGroup@3"
                 },
                 {
                     "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateConstructor",
+                    "command": "extension.javaGenerateUsingGui",
                     "group": "YourGroup@4"
-                },
-                {
-                    "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateConstructorUsingFields",
-                    "group": "YourGroup@5"
-                },
-                {
-                    "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateHashCodeAndEquals",
-                    "group": "YourGroup@6"
-                },
-                {
-                    "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateFluentSetters",
-                    "group": "YourGroup@7"
-                },
-                {
-                    "when": "resourceLangId == java",
-                    "command": "extension.javaGenerateAll",
-                    "group": "YourGroup@8"
                 }
             ]
         },
@@ -124,7 +85,12 @@
                     "java.code.generators.methodOpeningBraceOnNewLine": {
                         "type": "boolean",
                         "default": false,
-                        "description": "Option to put the method's opening brace on a new line instead of the same line"
+                        "description": "put the method's opening brace on a new line instead of the same line"
+                    },
+                    "java.code.generators.genertaeEvenIfExists": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "generate the code even if it's alrady exists"
                     }
                 }
             }
@@ -152,5 +118,8 @@
         "hooks": {
             "pre-commit": "prettier --write \"src/**/*.ts\""
         }
+    },
+    "dependencies": {
+        "java-ast": "^0.1.0"
     }
 }

@@ -1,138 +1,227 @@
 'use strict';
 import * as vscode from 'vscode';
-import { getDeclerations, getClassName, insertSnippet, getSelectedText, lowerCaseFirstLetter } from './functions';
-import { Decleration } from './decleration';
-import { isIncludeFluentWithSettersGetters, getMethodOpeningBraceOnNewLine } from './settings';
-
+import { getSelectedJavaClass, insertSnippet } from './functions';
+import { JavaClass } from './java-class';
+import { getMethodOpeningBraceOnNewLine, isIncludeFluentWithSettersGetters, isGenertaeEvenIfExists } from './settings';
+import { getGuiHtml } from './gui';
+let existsWarnings: string[] = [];
 export function activate(context: vscode.ExtensionContext) {
+    let onePanel: vscode.WebviewPanel;
     let generateAll = vscode.commands.registerCommand('extension.javaGenerateAll', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText())
-            .then(className => {
-                insertSnippet(generateToString(getDeclerations(getSelectedText())));
-
-                insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, lowerCaseFirstLetter(className)));
-
+        let editor = vscode.window.activeTextEditor!;
+        getSelectedJavaClass(editor)
+            .then(javaClass => {
+                let result = '';
+                result += generateEmptyConstrucor(javaClass);
+                result += generateConstructorUsingFields(javaClass);
+                result += generateGettersAndSetter(javaClass);
                 if (!isIncludeFluentWithSettersGetters()) {
-                    insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className));
+                    result += generateFluentSetters(javaClass);
                 }
-
-                insertSnippet(generateSetterGetters(className, getDeclerations(getSelectedText())));
-
-                insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
+                result += generateHashCodeAndEquals(javaClass);
+                result += generateToString(javaClass);
+                insertSnippet(result, editor);
+                showExistsWarningIfFound();
             })
             .catch(err => {
                 console.error(err);
             });
-    });
-
-    let generateGettersCommand = vscode.commands.registerCommand('extension.javaGenerateGetters', () => {
-        insertSnippet(generateGetters(getDeclerations(getSelectedText())));
-    });
-
-    let generateSettersGettersCommand = vscode.commands.registerCommand('extension.javaGenerateSettersGetters', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText())
-            .then(className => insertSnippet(generateSetterGetters(className, getDeclerations(getSelectedText()))))
-            .catch(err => {
-                console.error(err);
-            });
-    });
-
-    let generateToStringCommand = vscode.commands.registerCommand('extension.javaGenerateToString', () => {
-        insertSnippet(generateToString(getDeclerations(getSelectedText())));
     });
 
     let generateConstructorCommand = vscode.commands.registerCommand('extension.javaGenerateConstructor', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText())
-            .then(className => {
-                let result = `\n\tpublic ${className}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
-                insertSnippet(result);
-            })
-            .catch(err => {
-                console.error(err);
-            });
+        runner(generateEmptyConstrucor);
     });
 
-    let generateConstructorUsingFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingFields', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText())
-            .then(className => {
-                insertSnippet(generateConstructorUsingFields(getDeclerations(getSelectedText()), className));
-            })
-            .catch(err => {
-                console.error(err);
-            });
+    let generateConstructorUsingAllFinalFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingAllFinalFields', () => {
+        runner(generateConstructorUsingAllFinalFields);
     });
 
-    let generateHashCodeAndEqualsCommand = vscode.commands.registerCommand('extension.javaGenerateHashCodeAndEquals', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText())
-            .then(className => {
-                insertSnippet(generateHashCodeAndEquals(getDeclerations(getSelectedText()), className, lowerCaseFirstLetter(className)));
-            })
-            .catch(err => {
-                console.error(err);
-            });
-    });
+    let generateUsingGui = vscode.commands.registerCommand('extension.javaGenerateUsingGui', () => {
+        // if (onePanel) {
+        //     onePanel.dispose();
+        // }
+        let editor = vscode.window.activeTextEditor!;
 
-    let generateFluentSettersCommand = vscode.commands.registerCommand('extension.javaGenerateFluentSetters', () => {
-        getClassName(vscode.window.activeTextEditor!.document.getText())
-            .then(className => insertSnippet(generateFluentSetters(getDeclerations(getSelectedText()), className)))
-            .catch(err => {
-                console.error(err);
+        getSelectedJavaClass(editor)
+            .then(javaClass => {
+                onePanel = vscode.window.createWebviewPanel('javaGenerator', 'Java Generator', vscode.ViewColumn.Two, {
+                    enableScripts: true
+                });
+
+                onePanel.webview.html = getGuiHtml(javaClass);
+
+                onePanel.webview.onDidReceiveMessage(
+                    message => {
+                        console.log(message);
+
+                        if (message.data.fields.length === 0) {
+                            return;
+                        }
+                        javaClass.declerations = javaClass.declerations.filter(dic => {
+                            return message.data.fields.includes(dic.variableName);
+                        });
+
+                        switch (message.command) {
+                            case 'onlyGetters': {
+                                insertSnippet(generateOnlyGetters(javaClass), editor);
+                                break;
+                            }
+                            case 'gettersAndSetters': {
+                                insertSnippet(generateGettersAndSetter(javaClass), editor);
+                                break;
+                            }
+                            case 'constructorUsingFields': {
+                                insertSnippet(generateConstructorUsingFields(javaClass), editor);
+                                break;
+                            }
+                            case 'hashCodeAndEquals': {
+                                insertSnippet(generateHashCodeAndEquals(javaClass), editor);
+                                break;
+                            }
+                            case 'javaGenerateFluentSetters': {
+                                insertSnippet(generateFluentSetters(javaClass), editor);
+                                break;
+                            }
+                            case 'toString': {
+                                insertSnippet(generateToString(javaClass), editor);
+                                break;
+                            }
+                            case 'toStringWithoutGetters': {
+                                insertSnippet(generateToStringWithoutGetters(javaClass), editor);
+                                break;
+                            }
+                            case 'all': {
+                                let result = '';
+                                result += generateEmptyConstrucor(javaClass);
+                                result += generateConstructorUsingFields(javaClass);
+                                result += generateGettersAndSetter(javaClass);
+                                if (!isIncludeFluentWithSettersGetters()) {
+                                    result += generateFluentSetters(javaClass);
+                                }
+                                result += generateHashCodeAndEquals(javaClass);
+                                result += generateToString(javaClass);
+                                insertSnippet(result, editor);
+                                break;
+                            }
+                        }
+                        if (message.data.autoClose) {
+                            onePanel.dispose();
+                        }
+                        showExistsWarningIfFound();
+
+                        return;
+                    },
+                    undefined,
+                    context.subscriptions
+                );
+            })
+            .catch(error => {
+                console.error(error);
             });
     });
 
     context.subscriptions.push(generateAll);
-    context.subscriptions.push(generateGettersCommand);
-    context.subscriptions.push(generateSettersGettersCommand);
-    context.subscriptions.push(generateToStringCommand);
     context.subscriptions.push(generateConstructorCommand);
-    context.subscriptions.push(generateConstructorUsingFieldsCommand);
-    context.subscriptions.push(generateHashCodeAndEqualsCommand);
-    context.subscriptions.push(generateFluentSettersCommand);
+    context.subscriptions.push(generateConstructorUsingAllFinalFieldsCommand);
+    context.subscriptions.push(generateUsingGui);
+}
+
+function showExistsWarningIfFound() {
+    let warMessage = '';
+    existsWarnings.forEach(war => {
+        warMessage += ',' + war;
+    });
+    warMessage = warMessage.replace(',', '');
+    if (existsWarnings.length > 0) {
+        vscode.window.showWarningMessage('(' + warMessage + ') alrady exists');
+        existsWarnings = [];
+    }
 }
 
 export function deactivate() {}
 
-function generateGetters(declerations: Decleration[]): string {
+function generateOnlyGetters(javaClass: JavaClass): string {
     let result = '';
-    declerations.forEach(it => {
-        result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital}() ${getMethodOpeningBraceOnNewLine()}{
+    javaClass.declerations.forEach(it => {
+        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital()}`) === -1) {
+            result += `\n\tpublic ${it.variableType} ${
+                it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'
+            }${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n`;
+        }
     });
     return result;
 }
 
-function generateSetterGetters(className: string, declerations: Decleration[]): string {
+function generateGettersAndSetter(javaClass: JavaClass): string {
     let result = '';
-    declerations.forEach(it => {
-        result += `\n\tpublic ${it.variableType} ${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital}() ${getMethodOpeningBraceOnNewLine()}{
+    javaClass.declerations.forEach(it => {
+        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital()}`) === -1) {
+            result += `\n\tpublic ${it.variableType} ${
+                it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'
+            }${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
-\t}
-
-\tpublic void set${it.variableNameFirstCapital}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+\t}\n\n`;
+        }
+        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`set${it.variableNameFirstCapital()}`) === -1) {
+            result += `\tpublic void set${it.variableNameFirstCapital()}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t}\n`;
-    });
+        }
 
-    if (isIncludeFluentWithSettersGetters()) {
-        declerations.forEach(it => {
-            result += `\n\tpublic ${className} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+        if (isIncludeFluentWithSettersGetters()) {
+            if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
+                result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;
-        });
-    }
+            }
+        }
+    });
 
     return result;
 }
 
-export function generateToString(declerations: Decleration[]): string {
+function generateFluentSetters(javaClass: JavaClass): string {
+    let result = '';
+    javaClass.declerations.forEach(it => {
+        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
+            result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+\t\tthis.${it.variableName} = ${it.variableName};
+\t\treturn this;
+\t}\n`;
+        }
+    });
+    return result;
+}
+
+export function generateToString(javaClass: JavaClass): string {
+    if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf('toString') === -1) {
+        let result = `\n\t@Override
+\tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
+\t\treturn "{" +\n`;
+
+        javaClass.declerations.forEach(it => {
+            result += `\t\t\t", ${it.variableName}='" + ${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital()}() + "'" +\n`;
+        });
+
+        result += `\t\t\t"}";
+\t}\n`;
+        return result.replace(',', '');
+    } else {
+        existsWarnings.push('toString');
+        return '';
+    }
+}
+
+export function generateToStringWithoutGetters(javaClass: JavaClass): string {
     let result = `\n\t@Override
 \tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn "{" +\n`;
 
-    declerations.forEach(it => {
-        result += `\t\t\t", ${it.variableName}='" + ${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital}() + "'" +\n`;
+    javaClass.declerations.forEach(it => {
+        result += `\t\t\t", ${it.variableName}='" + ${it.variableName} + "'" +\n`;
     });
 
     result += `\t\t\t"}";
@@ -141,63 +230,98 @@ export function generateToString(declerations: Decleration[]): string {
     return result.replace(',', '');
 }
 
-export function generateConstructorUsingFields(declerations: Decleration[], className: string): string {
-    let result = `\n\tpublic ${className}(`;
-    declerations.forEach(it => {
+export function generateConstructorUsingFields(javaClass: JavaClass): string {
+    let result = `\n\tpublic ${javaClass.name}(`;
+    javaClass.declerations.forEach(it => {
         result += `${it.variableType} ${it.variableName}, `;
     });
     result = result.slice(0, -2) + `) ${getMethodOpeningBraceOnNewLine()}{\n`;
-    declerations.forEach(it => {
+    javaClass.declerations.forEach(it => {
         result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
     });
     result += `\t}\n`;
     return result;
 }
 
-export function generateHashCodeAndEquals(declerations: Decleration[], className: string, classNameFirstLower: string): string {
-    let result = `\n\t@Override
-    public boolean equals(Object o) ${getMethodOpeningBraceOnNewLine()}{
-        if (o == this)
-            return true;
-        if (!(o instanceof ${className})) {
-            return false;
-        }
-        ${className} ${classNameFirstLower} = (${className}) o;
-        return `;
-
-    declerations.forEach(it => {
-        if (it.isPrimitive()) {
-            result += `${it.variableName} == ${classNameFirstLower}.${it.variableName} && `;
-        } else {
-            result += `Objects.equals(${it.variableName}, ${classNameFirstLower}.${it.variableName}) && `;
+export function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
+    let result = `\n\tpublic ${javaClass.name}(`;
+    javaClass.declerations.forEach(it => {
+        if (it.isFinal) {
+            result += `${it.variableType} ${it.variableName}, `;
         }
     });
-    result = result.slice(0, -4) + `;\n\t}`;
-
-    result += `\n\n\t@Override
-\tpublic int hashCode() ${getMethodOpeningBraceOnNewLine()}{\n`;
-    if (declerations.length > 1) {
-        result += `\t\treturn Objects.hash(`;
-    } else {
-        result += `\t\treturn Objects.hashCode(`;
-    }
-
-    declerations.forEach(it => {
-        result += `${it.variableName}, `;
+    result = result.slice(0, -2) + `) ${getMethodOpeningBraceOnNewLine()}{\n`;
+    javaClass.declerations.forEach(it => {
+        if (it.isFinal) {
+            result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
+        }
     });
-    result = result.slice(0, -2) + `);\n`;
-
     result += `\t}\n`;
     return result;
 }
 
-function generateFluentSetters(declerations: Decleration[], className: string): string {
+export function generateHashCodeAndEquals(javaClass: JavaClass): string {
     let result = '';
-    declerations.forEach(it => {
-        result += `\n\tpublic ${className} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
-\t\tthis.${it.variableName} = ${it.variableName};
-\t\treturn this;
-\t}\n`;
-    });
+    if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf('equals') === -1) {
+        result += `\n\t@Override
+    public boolean equals(Object o) ${getMethodOpeningBraceOnNewLine()}{
+        if (o == this)
+            return true;
+        if (!(o instanceof ${javaClass.name})) {
+            return false;
+        }
+        ${javaClass.name} ${javaClass.nameLowerCase()} = (${javaClass.name}) o;
+        return `;
+
+        javaClass.declerations.forEach(it => {
+            if (it.isPrimitive()) {
+                result += `${it.variableName} == ${javaClass.nameLowerCase()}.${it.variableName} && `;
+            } else {
+                result += `Objects.equals(${it.variableName}, ${javaClass.nameLowerCase()}.${it.variableName}) && `;
+            }
+        });
+        result = result.slice(0, -4) + `;\n\t}`;
+    } else {
+        existsWarnings.push('equals');
+    }
+    if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf('hashCode') === -1) {
+        result += `\n\n\t@Override
+\tpublic int hashCode() ${getMethodOpeningBraceOnNewLine()}{\n`;
+        if (javaClass.declerations.length > 1) {
+            result += `\t\treturn Objects.hash(`;
+        } else {
+            result += `\t\treturn Objects.hashCode(`;
+        }
+
+        javaClass.declerations.forEach(it => {
+            result += `${it.variableName}, `;
+        });
+        result = result.slice(0, -2) + `);\n`;
+
+        result += `\t}\n`;
+    } else {
+        existsWarnings.push('hashCode');
+    }
     return result;
+}
+
+function generateEmptyConstrucor(javaClass: JavaClass): string {
+    if (isGenertaeEvenIfExists() || !javaClass.hasEmptyConstructor) {
+        return `\n\tpublic ${javaClass.name}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
+    } else {
+        existsWarnings.push('Empty Construcor');
+        return '';
+    }
+}
+
+function runner(fun: any) {
+    let editor = vscode.window.activeTextEditor!;
+    getSelectedJavaClass(editor)
+        .then(javaClass => {
+            insertSnippet(fun(javaClass), editor);
+            showExistsWarningIfFound();
+        })
+        .catch(err => {
+            console.error(err);
+        });
 }

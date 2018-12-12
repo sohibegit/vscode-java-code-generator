@@ -1,120 +1,144 @@
 'use strict';
+import { parse } from 'java-ast';
 import * as vscode from 'vscode';
 import { Decleration } from './decleration';
+import { JavaClass } from './java-class';
 
-export function getDeclerations(slectedText: string): Decleration[] {
-    if (slectedText.length < 2) {
-        vscode.window.showErrorMessage('select the properties first.');
-        throw new Error('select the properties first.');
-    }
-    const declerations: Decleration[] = [];
-
-    let classProperties = slectedText
-        .split(/\r?\n/)
-        .filter(x => x.length > 2)
-        .map(x => x.replace(';', ''));
-
-    for (let lineOfCode of classProperties) {
-        let declaration = lineOfCode
-            .split('=')[0]
-            .replace('final ', ' ')
-            .replace('public ', ' ')
-            .replace('private ', ' ')
-            .replace('protected ', ' ')
-            .trim()
-            .split(' ')
-            .filter(String);
-        let variableType = '';
-        let variableName = '';
-        let variableNameFirstCapital = '';
-        let skip = false;
-
-        if (declaration.length === 0 || '$/*@'.includes(declaration[0].charAt(0))) {
-            continue;
-        }
-
-        declaration.forEach(element => {
-            if (element === 'static') {
-                vscode.window.showWarningMessage(declaration[declaration.length - 1] + " skiped as it's static");
-                skip = true;
-            }
-        });
-
-        if (declaration.length === 1) {
-            vscode.window.showWarningMessage(declaration.join(' ') + " skiped as it's unvalid");
-            continue;
-        } else if (declaration.length === 2) {
-            variableType = declaration[0];
-            variableName = declaration[1];
-            variableNameFirstCapital = capitalizeFirstLetter(declaration[1]);
-        }
-
-        if (!skip) {
-            declerations.push(new Decleration(variableType, variableName, variableNameFirstCapital));
-        }
-    }
-    return declerations;
-}
-
-function capitalizeFirstLetter(string: string) {
+export function capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function lowerCaseFirstLetter(string: string) {
+export function lowerCaseFirstLetter(string: string): string {
     return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
-export async function getClassName(classFile: string): Promise<string> {
-    let regex = /(class|interface|enum)\s([^\n\s]*)/g;
-    //  console.log(classFile.match(regex));
-
-    let items: vscode.QuickPickItem[] = [];
-
-    let arrayOfClass = classFile.match(regex);
-    if (!arrayOfClass || arrayOfClass.length < 1) {
-        vscode.window.showErrorMessage("couldn't parse the class name please file an issue");
-        return Promise.reject("couldn't parse the class name please file an issue");
-    } else if (arrayOfClass.length === 1) {
-        return arrayOfClass[0].split(' ')[1];
-    } else {
-        arrayOfClass!.forEach(match => {
-            items.push({
-                label: match.split(' ')[1],
-                detail: match.split(' ')[0]
-            });
-        });
-        let classDecleration = await vscode.window.showQuickPick(items, {
-            canPickMany: false,
-            placeHolder: 'please pick...'
-        });
-
-        if (classDecleration) {
-            return classDecleration.label;
-        }
-        {
-            vscode.window.showErrorMessage("couldn't parse the class name please file an issue");
-            return Promise.reject("couldn't parse the class name please file an issue");
-        }
-    }
-}
-
-export function insertSnippet(snippet: string) {
-    let editor = vscode.window.activeTextEditor!;
+export function insertSnippet(snippet: string, editor: any) {
     let newLines = editor.document.lineAt(editor.selection.active.line).isEmptyOrWhitespace ? 0 : 1;
     editor.insertSnippet(new vscode.SnippetString(snippet), new vscode.Position(editor.selection.end.line + newLines, 0));
 }
 
-export function getSelectedText(): string {
-    let editor = vscode.window.activeTextEditor!;
+export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined): Promise<JavaClass> {
+    const javaClasses: JavaClass[] = [];
+    let selectedText = '';
     if (editor) {
-        let text = editor.document.getText(editor.selection);
-        if (text.length < 2) {
-            vscode.window.showErrorMessage('select the properties first.');
-            throw new Error('select the properties first.');
+        // selectedText = editor.document.getText(editor.selection);
+        // if (selectedText.length >= 2) {
+        //     selectedText = `package TmpSohibeTmp; public class TmpSohibeTmp { ${selectedText} }`;
+        // } else {
+        selectedText = editor.document.getText();
+        // }
+        let parsedCode;
+        try {
+            parsedCode = parse(selectedText);
+        } catch (error) {
+            vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+            return Promise.reject('error parsing the Java class check for syntax errors');
         }
-        return text;
-    } else {
-        vscode.window.showErrorMessage('right click on the editor then run the command.');
-        throw new Error('right click on the editor then run the command.');
+        parsedCode.typeDeclaration().forEach(type => {
+            let declerations: Decleration[] = [];
+            let className = '';
+            let methodsNames: string[] = [];
+            let hasEmptyConstructor = false;
+            let hasNoneEmptyConstructor = false;
+            try {
+                className = type.classDeclaration()!.IDENTIFIER()!.text;
+            } catch (error) {}
+            try {
+                type.classDeclaration()!
+                    .classBody()!
+                    .classBodyDeclaration()
+                    .forEach(classBodyDeclaration => {
+                        try {
+                            if (
+                                classBodyDeclaration
+                                    .memberDeclaration()!
+                                    .constructorDeclaration()!
+                                    .formalParameters()!
+                                    .formalParameterList() === undefined
+                            ) {
+                                hasEmptyConstructor = true;
+                            } else {
+                                hasNoneEmptyConstructor = true;
+                            }
+                        } catch (error) {}
+
+                        try {
+                            methodsNames.push(
+                                classBodyDeclaration
+                                    .memberDeclaration()!
+                                    .methodDeclaration()!
+                                    .IDENTIFIER()!.text
+                            );
+                        } catch (error) {}
+
+                        try {
+                            let isStatic = false;
+                            let isFinal = false;
+                            classBodyDeclaration.modifier().forEach(modifier => {
+                                if (modifier.classOrInterfaceModifier()!.STATIC()) {
+                                    isStatic = true;
+                                }
+                                if (modifier.classOrInterfaceModifier()!.FINAL()) {
+                                    isFinal = true;
+                                }
+                            });
+
+                            const variableType = classBodyDeclaration
+                                .memberDeclaration()!
+                                .fieldDeclaration()!
+                                .typeType().text;
+
+                            const variablenameName = classBodyDeclaration
+                                .memberDeclaration()!
+                                .fieldDeclaration()!
+                                .variableDeclarators()!
+                                .variableDeclarator()[0]
+                                .variableDeclaratorId().text;
+
+                            if (!isStatic) {
+                                declerations.push(new Decleration(variableType, variablenameName, isFinal));
+                            }
+                        } catch (error) {}
+                    });
+            } catch (error) {
+                vscode.window.showWarningMessage('check for syntax errors before using the generator');
+                return Promise.reject('error parsing the Java class check for syntax errors');
+            }
+
+            javaClasses.push(new JavaClass(className, declerations, methodsNames, hasEmptyConstructor, hasNoneEmptyConstructor));
+        });
     }
+
+    if (javaClasses.length === 0) {
+        console.log('javaClasses.length === 0');
+        vscode.window.showErrorMessage('error parsing the Java class please file an issue');
+        return Promise.reject('error parsing the Java class please file an issue');
+    }
+
+    if (javaClasses.length === 1) {
+        return javaClasses[0];
+    }
+
+    let items: vscode.QuickPickItem[] = [];
+
+    javaClasses!.forEach(javaClass => {
+        items.push({
+            label: javaClass.name,
+            detail: javaClass.name
+        });
+    });
+    let name = await vscode.window.showQuickPick(items, {
+        canPickMany: false,
+        placeHolder: 'please pick...'
+    });
+
+    for (let index = 0; index < javaClasses.length; index++) {
+        const javaClass = javaClasses[index];
+        if (name && javaClass.name === name.label) {
+            return javaClass;
+        }
+    }
+
+    vscode.window.showErrorMessage('error parsing the Java class please file an issue');
+    return Promise.reject('error parsing the Java class please file an issue');
 }
