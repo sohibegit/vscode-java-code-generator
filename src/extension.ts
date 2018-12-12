@@ -52,8 +52,6 @@ export function activate(context: vscode.ExtensionContext) {
 
                 onePanel.webview.onDidReceiveMessage(
                     message => {
-                        console.log(message);
-
                         if (message.data.fields.length === 0) {
                             return;
                         }
@@ -237,11 +235,15 @@ export function generateToStringWithoutGetters(javaClass: JavaClass): string {
 export function generateConstructorUsingFields(javaClass: JavaClass): string {
     let result = `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
-        result += `${it.variableType} ${it.variableName}, `;
+        if (!it.isFinalValueAlradySet) {
+            result += `${it.variableType} ${it.variableName}, `;
+        }
     });
     result = result.slice(0, -2) + `) ${getMethodOpeningBraceOnNewLine()}{\n`;
     javaClass.declerations.forEach(it => {
-        result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
+        if (!it.isFinalValueAlradySet) {
+            result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
+        }
     });
     result += `\t}\n`;
     return result;

@@ -89,7 +89,6 @@ export function getGuiHtml(javaClass: JavaClass) {
                 var result = { fields: [] };
                 result.autoClose = document.getElementById("auto-close-check-box").checked;
                 Array.prototype.forEach.call(document.forms[0].elements, function(element) {
-                    console.log(element.name + ' : ' + element.value + ' : ' + element.checked);
                     if (element.checked) {
                         result.fields.push(element.name);
                     }

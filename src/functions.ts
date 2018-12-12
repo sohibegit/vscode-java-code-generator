@@ -74,12 +74,26 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                         try {
                             let isStatic = false;
                             let isFinal = false;
+                            let isFinalValueAlradySet = false;
+
                             classBodyDeclaration.modifier().forEach(modifier => {
                                 if (modifier.classOrInterfaceModifier()!.STATIC()) {
                                     isStatic = true;
                                 }
                                 if (modifier.classOrInterfaceModifier()!.FINAL()) {
                                     isFinal = true;
+                                    try {
+                                        if (
+                                            classBodyDeclaration
+                                                .memberDeclaration()!
+                                                .fieldDeclaration()!
+                                                .variableDeclarators()!
+                                                .variableDeclarator(0)!
+                                                .variableInitializer()!.text
+                                        ) {
+                                            isFinalValueAlradySet = true;
+                                        }
+                                    } catch (error) {}
                                 }
                             });
 
@@ -96,7 +110,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                 .variableDeclaratorId().text;
 
                             if (!isStatic) {
-                                declerations.push(new Decleration(variableType, variablenameName, isFinal));
+                                declerations.push(new Decleration(variableType, variablenameName, isFinal, isFinalValueAlradySet));
                             }
                         } catch (error) {}
                     });
@@ -106,6 +120,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
             }
 
             javaClasses.push(new JavaClass(className, declerations, methodsNames, hasEmptyConstructor, hasNoneEmptyConstructor));
+            console.log(javaClasses);
         });
     }
 

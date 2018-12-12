@@ -3,10 +3,11 @@ export interface IDecleration {
     variableType: string;
     variableName: string;
     isFinal: boolean;
+    isFinalValueAlradySet: boolean;
 }
 
 export class Decleration implements IDecleration {
-    constructor(public variableType: string, public variableName: string, public isFinal: boolean) {}
+    constructor(public variableType: string, public variableName: string, public isFinal: boolean, public isFinalValueAlradySet: boolean) {}
 
     isPrimitive(): boolean {
         if (!this.variableType) {
