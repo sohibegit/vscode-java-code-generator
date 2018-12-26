@@ -141,12 +141,18 @@ export function deactivate() {}
 function generateOnlyGetters(javaClass: JavaClass): string {
     let result = '';
     javaClass.declerations.forEach(it => {
-        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital()}`) === -1) {
-            result += `\n\tpublic ${it.variableType} ${
-                it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'
-            }${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
+        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
+            result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n`;
+        }
+
+        if (it.isBoolean()) {
+            if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`is${it.variableNameFirstCapital()}`) === -1) {
+                result += `\n\tpublic ${it.variableType} is${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
+\t\treturn this.${it.variableName};
+\t}\n`;
+            }
         }
     });
     return result;
@@ -155,10 +161,16 @@ function generateOnlyGetters(javaClass: JavaClass): string {
 function generateGettersAndSetter(javaClass: JavaClass): string {
     let result = '';
     javaClass.declerations.forEach(it => {
-        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital()}`) === -1) {
-            result += `\n\tpublic ${it.variableType} ${
-                it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'
-            }${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
+        if (it.isBoolean()) {
+            if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`is${it.variableNameFirstCapital()}`) === -1) {
+                result += `\n\tpublic ${it.variableType} is${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
+\t\treturn this.${it.variableName};
+\t}\n`;
+            }
+        }
+
+        if (isGenertaeEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
+            result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n\n`;
         }

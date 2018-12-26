@@ -10,10 +10,11 @@ export class Decleration implements IDecleration {
     constructor(public variableType: string, public variableName: string, public isFinal: boolean, public isFinalValueAlradySet: boolean) {}
 
     isPrimitive(): boolean {
-        if (!this.variableType) {
-            return false;
-        }
         return ['byte', 'short', 'int', 'long', 'float', 'double', 'char', 'boolean'].indexOf(this.variableType) !== -1;
+    }
+
+    isBoolean(): boolean {
+        return 'boolean' === this.variableType.toLowerCase();
     }
 
     variableNameFirstCapital(): string {
