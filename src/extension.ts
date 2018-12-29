@@ -264,13 +264,13 @@ export function generateConstructorUsingFields(javaClass: JavaClass): string {
 export function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
     let result = `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
-        if (it.isFinal) {
+        if (it.isFinal && !it.isFinalValueAlradySet) {
             result += `${it.variableType} ${it.variableName}, `;
         }
     });
     result = result.slice(0, -2) + `) ${getMethodOpeningBraceOnNewLine()}{\n`;
     javaClass.declerations.forEach(it => {
-        if (it.isFinal) {
+        if (it.isFinal && !it.isFinalValueAlradySet) {
             result += `\t\tthis.${it.variableName} = ${it.variableName};\n`;
         }
     });
