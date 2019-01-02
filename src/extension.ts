@@ -31,6 +31,18 @@ export function activate(context: vscode.ExtensionContext) {
     let generateConstructorCommand = vscode.commands.registerCommand('extension.javaGenerateConstructor', () => {
         runner(generateEmptyConstrucor);
     });
+    
+    let generateHashCodeAndEqualsCommand = vscode.commands.registerCommand('extension.generateHashCodeAndEquals', () => {
+        runner(generateHashCodeAndEquals);
+    });
+    
+    let generateToStringCommand = vscode.commands.registerCommand('extension.generateToString', () => {
+        runner(generateToString);
+    });
+    
+    let generateConstructorUsingFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingFields', () => {
+        runner(generateConstructorUsingFields);
+    });
 
     let generateConstructorUsingAllFinalFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingAllFinalFields', () => {
         runner(generateConstructorUsingAllFinalFields);
