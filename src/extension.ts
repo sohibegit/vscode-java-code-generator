@@ -132,6 +132,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(generateAll);
     context.subscriptions.push(generateConstructorCommand);
+    
+    context.subscriptions.push(generateHashCodeAndEqualsCommand);
+    context.subscriptions.push(generateToStringCommand);
+    context.subscriptions.push(generateConstructorUsingFieldsCommand);
     context.subscriptions.push(generateConstructorUsingAllFinalFieldsCommand);
     context.subscriptions.push(generateUsingGui);
 }
