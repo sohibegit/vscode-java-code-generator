@@ -131,7 +131,7 @@ function showExistsWarningIfFound() {
     });
     warMessage = warMessage.replace(',', '');
     if (existsWarnings.length > 0) {
-        vscode.window.showWarningMessage('(' + warMessage + ') alrady exists');
+        vscode.window.showWarningMessage('(' + warMessage + ') already exists');
         existsWarnings = [];
     }
 }
@@ -327,7 +327,7 @@ function generateEmptyConstrucor(javaClass: JavaClass): string {
     if (isGenertaeEvenIfExists() || !javaClass.hasEmptyConstructor) {
         return `\n\tpublic ${javaClass.name}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
     } else {
-        existsWarnings.push('Empty Construcor');
+        existsWarnings.push('Empty Constructor');
         return '';
     }
 }
