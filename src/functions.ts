@@ -102,15 +102,15 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                 .fieldDeclaration()!
                                 .typeType().text;
 
-                            const variablenameName = classBodyDeclaration
-                                .memberDeclaration()!
-                                .fieldDeclaration()!
-                                .variableDeclarators()!
-                                .variableDeclarator()[0]
-                                .variableDeclaratorId().text;
-
                             if (!isStatic) {
-                                declerations.push(new Decleration(variableType, variablenameName, isFinal, isFinalValueAlradySet));
+                                classBodyDeclaration
+                                    .memberDeclaration()!
+                                    .fieldDeclaration()!
+                                    .variableDeclarators()!
+                                    .variableDeclarator()!
+                                    .forEach(variableDeclarator =>
+                                        declerations.push(new Decleration(variableType, variableDeclarator!.variableDeclaratorId()!.text, isFinal, isFinalValueAlradySet))
+                                    );
                             }
                         } catch (error) {}
                     });

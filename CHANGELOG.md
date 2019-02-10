@@ -1,5 +1,11 @@
 # Change Log
 
+## [4.1.0] - 2019-02-11
+
+### Added
+
+-   Support for multiple variables same line `private String firstName,lastName;`
+
 ## [4.0.0] - 2018-12-12
 
 ### Added
