@@ -245,6 +245,9 @@ export function generateToStringWithoutGetters(javaClass: JavaClass): string {
 }
 
 export function generateConstructorUsingFields(javaClass: JavaClass): string {
+    if (javaClass.declerations.length === 0) {
+        return generateEmptyConstrucor(javaClass);
+    }
     let result = `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
         if (!it.isFinalValueAlradySet) {
@@ -262,6 +265,9 @@ export function generateConstructorUsingFields(javaClass: JavaClass): string {
 }
 
 export function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
+    if (!javaClass.hasAnyFinalField()) {
+        return generateEmptyConstrucor(javaClass);
+    }
     let result = `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
         if (it.isFinal && !it.isFinalValueAlradySet) {

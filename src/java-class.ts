@@ -17,7 +17,17 @@ export class JavaClass implements IJavaClass {
         public hasEmptyConstructor: boolean,
         public hasNoneEmptyConstructor: boolean
     ) {}
+
     nameLowerCase(): string {
         return lowerCaseFirstLetter(this.name);
+    }
+
+    hasAnyFinalField() {
+        for (const dec of this.declerations) {
+            if (dec.isFinal) {
+                return true;
+            }
+        }
+        return false;
     }
 }
