@@ -17,9 +17,9 @@ export function isIncludeFluentWithSetters(): boolean | undefined {
     );
 }
 
-export function isGenertaeEvenIfExists(): boolean | undefined {
+export function isGenerateEvenIfExists(): boolean | undefined {
     return (
-        vscode.workspace.getConfiguration('java.code.generators').has('genertaeEvenIfExists') &&
-        vscode.workspace.getConfiguration('java.code.generators').get('genertaeEvenIfExists')
+        vscode.workspace.getConfiguration('java.code.generators').has('generateEvenIfExists') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('generateEvenIfExists')
     );
 }

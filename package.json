@@ -87,7 +87,7 @@
                         "default": false,
                         "description": "put the method's opening brace on a new line instead of the same line"
                     },
-                    "java.code.generators.genertaeEvenIfExists": {
+                    "java.code.generators.generateEvenIfExists": {
                         "type": "boolean",
                         "default": false,
                         "description": "generate the code even if it's alrady exists"
