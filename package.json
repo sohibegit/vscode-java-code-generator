@@ -91,6 +91,16 @@
                         "type": "boolean",
                         "default": false,
                         "description": "generate the code even if it's alrady exists"
+                    },
+                    "java.code.generators.onlyIdForHashAndEquals": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "use id only with hashCode() and equals()"
+                    },
+                    "java.code.generators.onlyPrimitiveForToString": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "use String, Primitive and Primitive Wrappers only for toString()"
                     }
                 }
             }

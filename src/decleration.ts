@@ -13,6 +13,14 @@ export class Decleration implements IDecleration {
         return ['byte', 'short', 'int', 'long', 'float', 'double', 'char', 'boolean'].indexOf(this.variableType) !== -1;
     }
 
+    isPrimitiveWrapper(): boolean {
+        return ['Byte', 'Short', 'Integer', 'Long', 'Float', 'Double', 'Char', 'Boolean'].indexOf(this.variableType) !== -1;
+    }
+
+    isString() {
+        return 'String' === this.variableType;
+    }
+
     isBoolean(): boolean {
         return 'boolean' === this.variableType.toLowerCase();
     }

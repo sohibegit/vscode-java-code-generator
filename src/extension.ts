@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
 import { JavaClass } from './java-class';
-import { getMethodOpeningBraceOnNewLine, isIncludeFluentWithSetters, isGenerateEvenIfExists } from './settings';
+import { getMethodOpeningBraceOnNewLine, isIncludeFluentWithSetters, isGenerateEvenIfExists, isOnlyPrimitiveForToString, isOnlyIdForHashAndEquals } from './settings';
 import { getGuiHtml } from './gui';
 let existsWarnings: string[] = [];
 export function activate(context: vscode.ExtensionContext) {
@@ -37,9 +37,6 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     let generateUsingGui = vscode.commands.registerCommand('extension.javaGenerateUsingGui', () => {
-        // if (onePanel) {
-        //     onePanel.dispose();
-        // }
         let editor = vscode.window.activeTextEditor!;
 
         getSelectedJavaClass(editor)
@@ -211,6 +208,9 @@ function generateFluentSetters(javaClass: JavaClass): string {
 }
 
 export function generateToString(javaClass: JavaClass): string {
+    if (isOnlyPrimitiveForToString()) {
+        return generateToStringOnlyPrimitives(javaClass);
+    }
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('toString') === -1) {
         let result = `\n\t@Override
 \tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
@@ -229,13 +229,54 @@ export function generateToString(javaClass: JavaClass): string {
     }
 }
 
+export function generateToStringOnlyPrimitives(javaClass: JavaClass): string {
+    if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('toString') === -1) {
+        let result = `\n\t@Override
+\tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
+\t\treturn "{" +\n`;
+
+        javaClass.declerations.forEach(it => {
+            if (it.isBoolean() || it.isString() || it.isPrimitive() || it.isPrimitiveWrapper()) {
+                result += `\t\t\t", ${it.variableName}='" + ${it.variableType.toLowerCase() === 'boolean' ? 'is' : 'get'}${it.variableNameFirstCapital()}() + "'" +\n`;
+            }
+        });
+
+        result += `\t\t\t"}";
+\t}\n`;
+        return result.replace(',', '');
+    } else {
+        existsWarnings.push('toString');
+        return '';
+    }
+}
+
 export function generateToStringWithoutGetters(javaClass: JavaClass): string {
+    if (isOnlyPrimitiveForToString()) {
+        return generateToStringWithoutGettersOnlyPrimitives(javaClass);
+    }
     let result = `\n\t@Override
 \tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn "{" +\n`;
 
     javaClass.declerations.forEach(it => {
         result += `\t\t\t", ${it.variableName}='" + ${it.variableName} + "'" +\n`;
+    });
+
+    result += `\t\t\t"}";
+\t}\n`;
+
+    return result.replace(',', '');
+}
+
+export function generateToStringWithoutGettersOnlyPrimitives(javaClass: JavaClass): string {
+    let result = `\n\t@Override
+\tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
+\t\treturn "{" +\n`;
+
+    javaClass.declerations.forEach(it => {
+        if (it.isBoolean() || it.isString() || it.isPrimitive() || it.isPrimitiveWrapper()) {
+            result += `\t\t\t", ${it.variableName}='" + ${it.variableName} + "'" +\n`;
+        }
     });
 
     result += `\t\t\t"}";
@@ -285,6 +326,9 @@ export function generateConstructorUsingAllFinalFields(javaClass: JavaClass): st
 }
 
 export function generateHashCodeAndEquals(javaClass: JavaClass): string {
+    if (isOnlyIdForHashAndEquals()) {
+        return generateHashCodeAndEqualsOnlyId(javaClass);
+    }
     let result = '';
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('equals') === -1) {
         result += `\n\t@Override
@@ -323,6 +367,39 @@ export function generateHashCodeAndEquals(javaClass: JavaClass): string {
         result = result.slice(0, -2) + `);\n`;
 
         result += `\t}\n`;
+    } else {
+        existsWarnings.push('hashCode');
+    }
+    return result;
+}
+
+export function generateHashCodeAndEqualsOnlyId(javaClass: JavaClass): string {
+    let result = '';
+    if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('equals') === -1) {
+        result += `\n\t@Override
+    public boolean equals(Object o) ${getMethodOpeningBraceOnNewLine()}{
+        if (o == this)
+            return true;
+        if (!(o instanceof ${javaClass.name})) {
+            return false;
+        }
+        ${javaClass.name} ${javaClass.nameLowerCase()} = (${javaClass.name}) o;
+        return `;
+
+        result += `Objects.equals(id, ${javaClass.nameLowerCase()}.id) && `;
+
+        result = result.slice(0, -4) + `;\n\t}\n`;
+    } else {
+        existsWarnings.push('equals');
+    }
+
+    if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('hashCode') === -1) {
+        result += `
+\t@Override
+\tpublic int hashCode() {
+\t\treturn Objects.hashCode(id);
+\t}
+`;
     } else {
         existsWarnings.push('hashCode');
     }

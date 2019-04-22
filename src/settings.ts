@@ -23,3 +23,17 @@ export function isGenerateEvenIfExists(): boolean | undefined {
         vscode.workspace.getConfiguration('java.code.generators').get('generateEvenIfExists')
     );
 }
+
+export function isOnlyIdForHashAndEquals(): boolean | undefined {
+    return (
+        vscode.workspace.getConfiguration('java.code.generators').has('onlyIdForHashAndEquals') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('onlyIdForHashAndEquals')
+    );
+}
+
+export function isOnlyPrimitiveForToString(): boolean | undefined {
+    return (
+        vscode.workspace.getConfiguration('java.code.generators').has('onlyPrimitiveForToString') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('onlyPrimitiveForToString')
+    );
+}
