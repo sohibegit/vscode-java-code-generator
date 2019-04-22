@@ -20,6 +20,19 @@ none
 
 ## Release Notes
 
+## [4.2.0] - 2019-04-22
+
+### Added
+
+-   Settings property to use id only with `hashCode()` and `equals()`
+-   Settings property to use String, Primitive and Primitive Wrappers only for `toString()`
+
+## [4.1.0] - 2019-02-11
+
+### Added
+
+-   Support for multiple variables same line `private String firstName,lastName;`
+
 ## [4.0.0] - 2018-12-12
 
 ### Added
@@ -29,18 +42,5 @@ none
 -   toString() without Getters()
 -   No need to highlight properties
 -   Determine existing code "prevents duplicate"
-
-## [3.3.0] - 2018-10-08
-
-### Added
-
--   Generate All
--   Option to put the method's opening brace on a new line instead of the same line "java.code.generators.methodOpeningBraceOnNewLine"
-
-### Fixed
-
--   selecting any variable marked as protected result in 'undefined'
-
----
 
 **Enjoy!**
