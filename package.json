@@ -2,7 +2,7 @@
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
     "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
-    "version": "4.1.1",
+    "version": "4.2.0",
     "publisher": "sohibe",
     "license": "MIT",
     "keywords": [
@@ -87,10 +87,20 @@
                         "default": false,
                         "description": "put the method's opening brace on a new line instead of the same line"
                     },
-                    "java.code.generators.genertaeEvenIfExists": {
+                    "java.code.generators.generateEvenIfExists": {
                         "type": "boolean",
                         "default": false,
                         "description": "generate the code even if it's alrady exists"
+                    },
+                    "java.code.generators.onlyIdForHashAndEquals": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "use id only with hashCode() and equals()"
+                    },
+                    "java.code.generators.onlyPrimitiveForToString": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "use String, Primitive and Primitive Wrappers only for toString()"
                     }
                 }
             }

@@ -21,12 +21,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
     const javaClasses: JavaClass[] = [];
     let selectedText = '';
     if (editor) {
-        // selectedText = editor.document.getText(editor.selection);
-        // if (selectedText.length >= 2) {
-        //     selectedText = `package TmpSohibeTmp; public class TmpSohibeTmp { ${selectedText} }`;
-        // } else {
         selectedText = editor.document.getText();
-        // }
         let parsedCode;
         try {
             parsedCode = parse(selectedText);
