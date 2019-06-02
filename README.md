@@ -14,33 +14,8 @@
 
 ![how use](images/usagev4.gif)
 
-## Requirements
+---
 
-none
+If this extension helped you, consider helping me by donating
 
-## Release Notes
-
-## [4.2.0] - 2019-04-22
-
-### Added
-
--   Settings property to use id only with `hashCode()` and `equals()`
--   Settings property to use String, Primitive and Primitive Wrappers only for `toString()`
-
-## [4.1.0] - 2019-02-11
-
-### Added
-
--   Support for multiple variables same line `private String firstName,lastName;`
-
-## [4.0.0] - 2018-12-12
-
-### Added
-
--   Generator GUI
--   Generate all "Quick"
--   toString() without Getters()
--   No need to highlight properties
--   Determine existing code "prevents duplicate"
-
-**Enjoy!**
+<a href="https://donorbox.org/vscode-java-code-generators" target="_blank"><img src="https://d1iczxrky3cnb2.cloudfront.net/button-large-blue.png" /></a>
