@@ -17,6 +17,10 @@ export function isIncludeFluentWithSetters(): boolean | undefined {
     );
 }
 
+export function getFluentMethodPrefix(): string {
+    return vscode.workspace.getConfiguration('java.code.generators').get('fluentMethodPrefix') || '';
+}
+
 export function isGenerateEvenIfExists(): boolean | undefined {
     return (
         vscode.workspace.getConfiguration('java.code.generators').has('generateEvenIfExists') &&

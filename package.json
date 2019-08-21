@@ -82,6 +82,11 @@
                         "default": false,
                         "description": "Include Fluent Setters with Java: Generate Setters and Getters"
                     },
+                    "java.code.generators.fluentMethodPrefix": {
+                        "type": "string",
+                        "default": "",
+                        "description": "Use as prefix for the fluent methods (like with...)"
+                    },
                     "java.code.generators.methodOpeningBraceOnNewLine": {
                         "type": "boolean",
                         "default": false,
