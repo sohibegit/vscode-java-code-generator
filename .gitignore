@@ -4,3 +4,4 @@ node_modules
 *.vsix
 images/.DS_Store
 .DS_Store
+dist

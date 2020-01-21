@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
                 onePanel.webview.html = getGuiHtml(javaClass);
 
                 onePanel.webview.onDidReceiveMessage(
-                    message => {
+                    (message: any) => {
                         if (message.data.fields.length === 0) {
                             return;
                         }
@@ -187,7 +187,9 @@ function generateGettersAndSetter(javaClass: JavaClass): string {
 
             if (isIncludeFluentWithSetters()) {
                 if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
-                    result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+                    result += `\n\tpublic ${javaClass.name} ${getFluentMethodPrefix() ? getFluentMethodPrefix() + it.variableNameFirstCapital() : it.variableName}(${
+                        it.variableType
+                    } ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;

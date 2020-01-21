@@ -1,8 +1,7 @@
-'use strict';
-import { parse } from 'java-ast';
 import * as vscode from 'vscode';
 import { Decleration } from './decleration';
 import { JavaClass } from './java-class';
+import { parse } from 'java-ast';
 
 export function capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -29,7 +28,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
             vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
             return Promise.reject('error parsing the Java class check for syntax errors');
         }
-        parsedCode.typeDeclaration().forEach(type => {
+        parsedCode.typeDeclaration().forEach((type: any) => {
             let declerations: Decleration[] = [];
             let className = '';
             let methodsNames: string[] = [];
@@ -42,7 +41,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                 type.classDeclaration()!
                     .classBody()!
                     .classBodyDeclaration()
-                    .forEach(classBodyDeclaration => {
+                    .forEach((classBodyDeclaration: any) => {
                         try {
                             if (
                                 classBodyDeclaration
@@ -71,7 +70,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                             let isFinal = false;
                             let isFinalValueAlradySet = false;
 
-                            classBodyDeclaration.modifier().forEach(modifier => {
+                            classBodyDeclaration.modifier().forEach((modifier: any) => {
                                 if (modifier.classOrInterfaceModifier()!.STATIC()) {
                                     isStatic = true;
                                 }
@@ -103,7 +102,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                     .fieldDeclaration()!
                                     .variableDeclarators()!
                                     .variableDeclarator()!
-                                    .forEach(variableDeclarator =>
+                                    .forEach((variableDeclarator: any) =>
                                         declerations.push(new Decleration(variableType, variableDeclarator!.variableDeclaratorId()!.text, isFinal, isFinalValueAlradySet))
                                     );
                             }

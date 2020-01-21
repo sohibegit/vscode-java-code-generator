@@ -2,7 +2,7 @@
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
     "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
-    "version": "4.2.1",
+    "version": "5.0.0",
     "publisher": "sohibe",
     "license": "MIT",
     "keywords": [
@@ -29,7 +29,7 @@
         "onCommand:extension.javaGenerateAll",
         "onCommand:extension.javaGenerateUsingGui"
     ],
-    "main": "./out/extension",
+    "main": "./dist/extension",
     "contributes": {
         "commands": [
             {
@@ -112,22 +112,26 @@
         ]
     },
     "icon": "images/icon.png",
+    "typings": "vscode.d.ts",
     "scripts": {
         "prettier": "prettier --write \"src/**/*.ts\"",
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+        "vscode:prepublish": "webpack --mode production",
+        "webpack": "webpack --mode development",
+        "webpack-dev": "webpack --mode development --watch",
+        "test-compile": "tsc -p ./",
+        "lint": "tslint -p ./"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.42",
         "@types/node": "^7.0.43",
         "husky": "4.0.10",
         "prettier": "1.19.1",
+        "ts-loader": "^6.2.1",
         "tslint": "5.20.1",
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.21"
+        "typescript": "3.7.5",
+        "vscode": "^1.1.21",
+        "webpack": "^4.41.5",
+        "webpack-cli": "^3.3.10"
     },
     "husky": {
         "hooks": {
