@@ -2,7 +2,14 @@
 import * as vscode from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
 import { JavaClass } from './java-class';
-import { getMethodOpeningBraceOnNewLine, isIncludeFluentWithSetters, isGenerateEvenIfExists, isOnlyPrimitiveForToString, isOnlyIdForHashAndEquals } from './settings';
+import {
+    getMethodOpeningBraceOnNewLine,
+    isIncludeFluentWithSetters,
+    getFluentMethodPrefix,
+    isGenerateEvenIfExists,
+    isOnlyPrimitiveForToString,
+    isOnlyIdForHashAndEquals
+} from './settings';
 import { getGuiHtml } from './gui';
 let existsWarnings: string[] = [];
 export function activate(context: vscode.ExtensionContext) {
@@ -197,7 +204,9 @@ function generateFluentSetters(javaClass: JavaClass): string {
     javaClass.declerations.forEach(it => {
         if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
             if (!it.isFinal) {
-                result += `\n\tpublic ${javaClass.name} ${it.variableName}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
+                result += `\n\tpublic ${javaClass.name} ${getFluentMethodPrefix() ? getFluentMethodPrefix() + it.variableNameFirstCapital() : it.variableName}(${it.variableType} ${
+                    it.variableName
+                }) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t\treturn this;
 \t}\n`;
