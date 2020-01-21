@@ -1,7 +1,9 @@
 .vscode/**
 .vscode-test/**
+out/
 out/test/**
 out/**/*.map
+src/
 src/**
 .gitignore
 tsconfig.json
@@ -11,4 +13,5 @@ tslint.json
 **/tsconfig.json
 !file.ts
 .prettierignore
+node_modules
 webpack.config.js
