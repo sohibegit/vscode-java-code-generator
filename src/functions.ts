@@ -12,7 +12,7 @@ export function lowerCaseFirstLetter(string: string): string {
     return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
-export function insertSnippet(snippet: string, editor: any) {
+export function insertSnippet(snippet: string, editor: vscode.TextEditor) {
     let newLines = editor.document.lineAt(editor.selection.active.line).isEmptyOrWhitespace ? 0 : 1;
     editor.insertSnippet(new vscode.SnippetString(snippet), new vscode.Position(editor.selection.end.line + newLines, 0));
 }
@@ -115,12 +115,10 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
             }
 
             javaClasses.push(new JavaClass(className, declerations, methodsNames, hasEmptyConstructor, hasNoneEmptyConstructor));
-            console.log(javaClasses);
         });
     }
 
     if (javaClasses.length === 0) {
-        console.log('javaClasses.length === 0');
         vscode.window.showErrorMessage('error parsing the Java class please file an issue');
         return Promise.reject('error parsing the Java class please file an issue');
     }

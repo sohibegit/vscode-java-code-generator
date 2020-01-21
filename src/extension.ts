@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     let generateUsingGui = vscode.commands.registerCommand('extension.javaGenerateUsingGui', () => {
         let editor = vscode.window.activeTextEditor!;
-
+        console.log(editor.viewColumn);
         getSelectedJavaClass(editor)
             .then(javaClass => {
                 onePanel = vscode.window.createWebviewPanel('javaGenerator', 'Java Generator', vscode.ViewColumn.Two, {

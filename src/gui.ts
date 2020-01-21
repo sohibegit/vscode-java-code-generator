@@ -67,9 +67,7 @@ export function getGuiHtml(javaClass: JavaClass) {
 
     javaClass.declerations.forEach(decleration => {
         guiHTML += /*html*/ `
-                <input type="checkbox" class="field-check-box" name="${decleration.variableName}" checked /><strong>${decleration.variableName}</strong> ${
-            decleration.variableType
-        } <br />  
+                <input type="checkbox" class="field-check-box" name="${decleration.variableName}" checked /><strong>${decleration.variableName}</strong> ${decleration.variableType} <br />  
     `;
     });
 
