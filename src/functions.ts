@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { Decleration } from './decleration';
 import { JavaClass } from './java-class';
 import { parse } from 'java-ast';
+import { TypeDeclarationContext, ClassBodyDeclarationContext, ModifierContext, VariableDeclaratorContext } from 'java-ast/dist/parser/JavaParser';
+import { copyJsonPropertyAnnotationsFromVariablesToSettersGetters } from './settings';
 
 export function capitalizeFirstLetter(string: string): string {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -28,7 +30,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
             vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
             return Promise.reject('error parsing the Java class check for syntax errors');
         }
-        parsedCode.typeDeclaration().forEach((type: any) => {
+        parsedCode.typeDeclaration().forEach((type: TypeDeclarationContext) => {
             let declerations: Decleration[] = [];
             let className = '';
             let methodsNames: string[] = [];
@@ -41,7 +43,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                 type.classDeclaration()!
                     .classBody()!
                     .classBodyDeclaration()
-                    .forEach((classBodyDeclaration: any) => {
+                    .forEach((classBodyDeclaration: ClassBodyDeclarationContext) => {
                         try {
                             if (
                                 classBodyDeclaration
@@ -63,14 +65,16 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                     .methodDeclaration()!
                                     .IDENTIFIER()!.text
                             );
-                        } catch (error) {}
+                        } catch (error) {
+                            console.error(error);
+                        }
 
                         try {
                             let isStatic = false;
                             let isFinal = false;
                             let isFinalValueAlradySet = false;
 
-                            classBodyDeclaration.modifier().forEach((modifier: any) => {
+                            classBodyDeclaration.modifier().forEach((modifier: ModifierContext) => {
                                 if (modifier.classOrInterfaceModifier()!.STATIC()) {
                                     isStatic = true;
                                 }
@@ -91,6 +95,18 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                 }
                             });
 
+                            let jsonPropertyAnnotation: string;
+                            if (copyJsonPropertyAnnotationsFromVariablesToSettersGetters()) {
+                                const modifiers = classBodyDeclaration.modifier();
+                                modifiers.forEach(modifire => {
+                                    const annotation = modifire.classOrInterfaceModifier()!.annotation();
+                                    if (annotation) {
+                                        if (annotation.getChild(1).text === 'JsonProperty') {
+                                            jsonPropertyAnnotation = annotation.text;
+                                        }
+                                    }
+                                });
+                            }
                             const variableType = classBodyDeclaration
                                 .memberDeclaration()!
                                 .fieldDeclaration()!
@@ -102,13 +118,18 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                     .fieldDeclaration()!
                                     .variableDeclarators()!
                                     .variableDeclarator()!
-                                    .forEach((variableDeclarator: any) =>
-                                        declerations.push(new Decleration(variableType, variableDeclarator!.variableDeclaratorId()!.text, isFinal, isFinalValueAlradySet))
+                                    .forEach((variableDeclarator: VariableDeclaratorContext) =>
+                                        declerations.push(
+                                            new Decleration(variableType, variableDeclarator!.variableDeclaratorId()!.text, isFinal, isFinalValueAlradySet, jsonPropertyAnnotation)
+                                        )
                                     );
                             }
-                        } catch (error) {}
+                        } catch (error) {
+                            console.error(error);
+                        }
                     });
             } catch (error) {
+                console.error(error);
                 vscode.window.showWarningMessage('check for syntax errors before using the generator');
                 return Promise.reject('error parsing the Java class check for syntax errors');
             }

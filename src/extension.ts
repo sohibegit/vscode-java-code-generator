@@ -45,7 +45,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     let generateUsingGui = vscode.commands.registerCommand('extension.javaGenerateUsingGui', () => {
         let editor = vscode.window.activeTextEditor!;
-        console.log(editor.viewColumn);
         getSelectedJavaClass(editor)
             .then(javaClass => {
                 onePanel = vscode.window.createWebviewPanel('javaGenerator', 'Java Generator', vscode.ViewColumn.Two, {
@@ -165,6 +164,9 @@ function generateOnlyGetters(javaClass: JavaClass): string {
 function generateGettersAndSetter(javaClass: JavaClass): string {
     let result = '';
     javaClass.declerations.forEach(it => {
+        if (it.annotation) {
+            result += `\n\t${it.annotation}`;
+        }
         if (it.isBoolean()) {
             if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`is${it.variableNameFirstCapital()}`) === -1) {
                 result += `\n\tpublic ${it.variableType} is${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
@@ -177,6 +179,9 @@ function generateGettersAndSetter(javaClass: JavaClass): string {
             result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n\n`;
+        }
+        if (it.annotation) {
+            result += `\t${it.annotation}\n`;
         }
         if (!it.isFinal) {
             if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`set${it.variableNameFirstCapital()}`) === -1) {

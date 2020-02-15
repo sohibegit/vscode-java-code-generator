@@ -1,5 +1,11 @@
 # Change Log
 
+## [5.2.0] - 2019-02-15
+
+### Added
+
+-   Settings property to copy `@JsonProperty` annotation from variables to Setters and Getters.`
+
 ## [4.2.0] - 2019-04-22
 
 ### Added

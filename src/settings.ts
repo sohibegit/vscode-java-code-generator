@@ -41,3 +41,10 @@ export function isOnlyPrimitiveForToString(): boolean | undefined {
         vscode.workspace.getConfiguration('java.code.generators').get('onlyPrimitiveForToString')
     );
 }
+
+export function copyJsonPropertyAnnotationsFromVariablesToSettersGetters(): boolean | undefined {
+    return (
+        vscode.workspace.getConfiguration('java.code.generators').has('copyJsonPropertyAnnotationsFromVariablesToSettersGetters') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('copyJsonPropertyAnnotationsFromVariablesToSettersGetters')
+    );
+}
