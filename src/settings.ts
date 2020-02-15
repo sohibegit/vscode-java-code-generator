@@ -48,3 +48,10 @@ export function copyJsonPropertyAnnotationsFromVariablesToSettersGetters(): bool
         vscode.workspace.getConfiguration('java.code.generators').get('copyJsonPropertyAnnotationsFromVariablesToSettersGetters')
     );
 }
+
+export function includeGeneratedAnnotation(): boolean | undefined {
+    return (
+        vscode.workspace.getConfiguration('java.code.generators').has('includeGeneratedAnnotation') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('includeGeneratedAnnotation')
+    );
+}

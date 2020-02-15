@@ -111,6 +111,11 @@
                         "type": "boolean",
                         "default": false,
                         "description": "copy @JsonProperty annotation from variables to Setters and Getters."
+                    },
+                    "java.code.generators.includeGeneratedAnnotation": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "include @Generated(\"sohibe.vscode\") annotation with the generated code."
                     }
                 }
             }

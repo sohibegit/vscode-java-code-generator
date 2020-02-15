@@ -1,6 +1,12 @@
 # Change Log
 
-## [5.2.0] - 2019-02-15
+## [5.3.0] - 2020-02-15
+
+### Added
+
+-   Settings property to include`@Generated("sohibe.vscode")` annotation with the generated code.`
+
+## [5.2.0] - 2020-02-15
 
 ### Added
 

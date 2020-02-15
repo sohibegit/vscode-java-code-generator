@@ -8,7 +8,8 @@ import {
     getFluentMethodPrefix,
     isGenerateEvenIfExists,
     isOnlyPrimitiveForToString,
-    isOnlyIdForHashAndEquals
+    isOnlyIdForHashAndEquals,
+    includeGeneratedAnnotation
 } from './settings';
 import { getGuiHtml } from './gui';
 let existsWarnings: string[] = [];
@@ -164,27 +165,25 @@ function generateOnlyGetters(javaClass: JavaClass): string {
 function generateGettersAndSetter(javaClass: JavaClass): string {
     let result = '';
     javaClass.declerations.forEach(it => {
-        if (it.annotation) {
-            result += `\n\t${it.annotation}`;
-        }
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
         if (it.isBoolean()) {
             if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`is${it.variableNameFirstCapital()}`) === -1) {
+                result += it.annotation ? `\n\t${it.annotation}` : '';
                 result += `\n\tpublic ${it.variableType} is${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n`;
             }
         }
-
         if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
+            result += it.annotation ? `\n\t${it.annotation}` : '';
             result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n\n`;
         }
-        if (it.annotation) {
-            result += `\t${it.annotation}\n`;
-        }
         if (!it.isFinal) {
             if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`set${it.variableNameFirstCapital()}`) === -1) {
+                result += includeGeneratedAnnotation() ? `\t@Generated("sohibe.vscode")\n` : '';
+                result += it.annotation ? `\t${it.annotation}\n` : '';
                 result += `\tpublic void set${it.variableNameFirstCapital()}(${it.variableType} ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
 \t\tthis.${it.variableName} = ${it.variableName};
 \t}\n`;
@@ -192,6 +191,8 @@ function generateGettersAndSetter(javaClass: JavaClass): string {
 
             if (isIncludeFluentWithSetters()) {
                 if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(it.variableName) === -1) {
+                    result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+                    result += it.annotation ? `\n\t${it.annotation}` : '';
                     result += `\n\tpublic ${javaClass.name} ${getFluentMethodPrefix() ? getFluentMethodPrefix() + it.variableNameFirstCapital() : it.variableName}(${
                         it.variableType
                     } ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
@@ -223,12 +224,14 @@ function generateFluentSetters(javaClass: JavaClass): string {
     return result;
 }
 
-export function generateToString(javaClass: JavaClass): string {
+function generateToString(javaClass: JavaClass): string {
     if (isOnlyPrimitiveForToString()) {
         return generateToStringOnlyPrimitives(javaClass);
     }
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('toString') === -1) {
-        let result = `\n\t@Override
+        let result = '';
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+        result += `\n\t@Override
 \tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn "{" +\n`;
 
@@ -245,9 +248,11 @@ export function generateToString(javaClass: JavaClass): string {
     }
 }
 
-export function generateToStringOnlyPrimitives(javaClass: JavaClass): string {
+function generateToStringOnlyPrimitives(javaClass: JavaClass): string {
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('toString') === -1) {
-        let result = `\n\t@Override
+        let result = '';
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+        result += `\n\t@Override
 \tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn "{" +\n`;
 
@@ -266,7 +271,7 @@ export function generateToStringOnlyPrimitives(javaClass: JavaClass): string {
     }
 }
 
-export function generateToStringWithoutGetters(javaClass: JavaClass): string {
+function generateToStringWithoutGetters(javaClass: JavaClass): string {
     if (isOnlyPrimitiveForToString()) {
         return generateToStringWithoutGettersOnlyPrimitives(javaClass);
     }
@@ -284,7 +289,7 @@ export function generateToStringWithoutGetters(javaClass: JavaClass): string {
     return result.replace(',', '');
 }
 
-export function generateToStringWithoutGettersOnlyPrimitives(javaClass: JavaClass): string {
+function generateToStringWithoutGettersOnlyPrimitives(javaClass: JavaClass): string {
     let result = `\n\t@Override
 \tpublic String toString() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn "{" +\n`;
@@ -301,11 +306,13 @@ export function generateToStringWithoutGettersOnlyPrimitives(javaClass: JavaClas
     return result.replace(',', '');
 }
 
-export function generateConstructorUsingFields(javaClass: JavaClass): string {
+function generateConstructorUsingFields(javaClass: JavaClass): string {
     if (javaClass.declerations.length === 0) {
         return generateEmptyConstrucor(javaClass);
     }
-    let result = `\n\tpublic ${javaClass.name}(`;
+    let result = '';
+    result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+    result += `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
         if (!it.isFinalValueAlradySet) {
             result += `${it.variableType} ${it.variableName}, `;
@@ -321,7 +328,7 @@ export function generateConstructorUsingFields(javaClass: JavaClass): string {
     return result;
 }
 
-export function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
+function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
     if (!javaClass.hasAnyFinalField()) {
         return generateEmptyConstrucor(javaClass);
     }
@@ -341,12 +348,13 @@ export function generateConstructorUsingAllFinalFields(javaClass: JavaClass): st
     return result;
 }
 
-export function generateHashCodeAndEquals(javaClass: JavaClass): string {
+function generateHashCodeAndEquals(javaClass: JavaClass): string {
     if (isOnlyIdForHashAndEquals()) {
         return generateHashCodeAndEqualsOnlyId(javaClass);
     }
     let result = '';
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('equals') === -1) {
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
         result += `\n\t@Override
     public boolean equals(Object o) ${getMethodOpeningBraceOnNewLine()}{
         if (o == this)
@@ -364,12 +372,13 @@ export function generateHashCodeAndEquals(javaClass: JavaClass): string {
                 result += `Objects.equals(${it.variableName}, ${javaClass.nameLowerCase()}.${it.variableName}) && `;
             }
         });
-        result = result.slice(0, -4) + `;\n\t}`;
+        result = result.slice(0, -4) + `;\n\t}\n`;
     } else {
         existsWarnings.push('equals');
     }
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('hashCode') === -1) {
-        result += `\n\n\t@Override
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+        result += `\n\t@Override
 \tpublic int hashCode() ${getMethodOpeningBraceOnNewLine()}{\n`;
         if (javaClass.declerations.length > 1) {
             result += `\t\treturn Objects.hash(`;
@@ -389,9 +398,10 @@ export function generateHashCodeAndEquals(javaClass: JavaClass): string {
     return result;
 }
 
-export function generateHashCodeAndEqualsOnlyId(javaClass: JavaClass): string {
+function generateHashCodeAndEqualsOnlyId(javaClass: JavaClass): string {
     let result = '';
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('equals') === -1) {
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
         result += `\n\t@Override
     public boolean equals(Object o) ${getMethodOpeningBraceOnNewLine()}{
         if (o == this)
@@ -410,8 +420,8 @@ export function generateHashCodeAndEqualsOnlyId(javaClass: JavaClass): string {
     }
 
     if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf('hashCode') === -1) {
-        result += `
-\t@Override
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+        result += `\n\t@Override
 \tpublic int hashCode() {
 \t\treturn Objects.hashCode(id);
 \t}
@@ -424,7 +434,10 @@ export function generateHashCodeAndEqualsOnlyId(javaClass: JavaClass): string {
 
 function generateEmptyConstrucor(javaClass: JavaClass): string {
     if (isGenerateEvenIfExists() || !javaClass.hasEmptyConstructor) {
-        return `\n\tpublic ${javaClass.name}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
+        let result = '';
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+        result += `\n\tpublic ${javaClass.name}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
+        return result;
     } else {
         existsWarnings.push('Empty Constructor');
         return '';
