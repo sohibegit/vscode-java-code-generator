@@ -1,16 +1,27 @@
 # Change Log
 
+## [7.0.0] - 2021-01-08
+
+### Added
+
+-   added new Submenu contains all the available commands.
+-   Settings property to let Fluent Setters calls normal Setters and it's true by default.
+
+### Fixed
+
+-   some tweaks and fixs
+
 ## [5.3.0] - 2020-02-15
 
 ### Added
 
--   Settings property to include`@Generated("sohibe.vscode")` annotation with the generated code.`
+-   Settings property to include`@Generated("sohibe.vscode")` annotation with the generated code.
 
 ## [5.2.0] - 2020-02-15
 
 ### Added
 
--   Settings property to copy `@JsonProperty` annotation from variables to Setters and Getters.`
+-   Settings property to copy `@JsonProperty` annotation from variables to Setters and Getters.
 
 ## [4.2.0] - 2019-04-22
 
