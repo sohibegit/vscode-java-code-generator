@@ -1,8 +1,8 @@
+import { parse } from 'java-ast';
+import { ClassBodyDeclarationContext, ModifierContext, TypeDeclarationContext, VariableDeclaratorContext } from 'java-ast/dist/parser/JavaParser';
 import * as vscode from 'vscode';
 import { Decleration } from './decleration';
 import { JavaClass } from './java-class';
-import { parse } from 'java-ast';
-import { TypeDeclarationContext, ClassBodyDeclarationContext, ModifierContext, VariableDeclaratorContext } from 'java-ast/dist/parser/JavaParser';
 import { copyJsonPropertyAnnotationsFromVariablesToSettersGetters } from './settings';
 
 export function capitalizeFirstLetter(string: string): string {
@@ -45,13 +45,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                     .classBodyDeclaration()
                     .forEach((classBodyDeclaration: ClassBodyDeclarationContext) => {
                         try {
-                            if (
-                                classBodyDeclaration
-                                    .memberDeclaration()!
-                                    .constructorDeclaration()!
-                                    .formalParameters()!
-                                    .formalParameterList() === undefined
-                            ) {
+                            if (classBodyDeclaration.memberDeclaration()!.constructorDeclaration()!.formalParameters()!.formalParameterList() === undefined) {
                                 hasEmptyConstructor = true;
                             } else {
                                 hasNoneEmptyConstructor = true;
@@ -59,14 +53,9 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                         } catch (error) {}
 
                         try {
-                            methodsNames.push(
-                                classBodyDeclaration
-                                    .memberDeclaration()!
-                                    .methodDeclaration()!
-                                    .IDENTIFIER()!.text
-                            );
+                            methodsNames.push(classBodyDeclaration.memberDeclaration()!.methodDeclaration()!.IDENTIFIER()!.text);
                         } catch (error) {
-                            console.error(error);
+                            // console.error(error);
                         }
 
                         try {
@@ -82,12 +71,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                     isFinal = true;
                                     try {
                                         if (
-                                            classBodyDeclaration
-                                                .memberDeclaration()!
-                                                .fieldDeclaration()!
-                                                .variableDeclarators()!
-                                                .variableDeclarator(0)!
-                                                .variableInitializer()!.text
+                                            classBodyDeclaration.memberDeclaration()!.fieldDeclaration()!.variableDeclarators()!.variableDeclarator(0)!.variableInitializer()!.text
                                         ) {
                                             isFinalValueAlradySet = true;
                                         }
@@ -107,10 +91,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                     }
                                 });
                             }
-                            const variableType = classBodyDeclaration
-                                .memberDeclaration()!
-                                .fieldDeclaration()!
-                                .typeType().text;
+                            const variableType = classBodyDeclaration.memberDeclaration()!.fieldDeclaration()!.typeType().text;
 
                             if (!isStatic) {
                                 classBodyDeclaration
@@ -152,12 +133,12 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
     javaClasses!.forEach(javaClass => {
         items.push({
             label: javaClass.name,
-            detail: javaClass.name
+            detail: javaClass.name,
         });
     });
     let name = await vscode.window.showQuickPick(items, {
         canPickMany: false,
-        placeHolder: 'please pick...'
+        placeHolder: 'please pick...',
     });
 
     for (let index = 0; index < javaClasses.length; index++) {

@@ -55,3 +55,10 @@ export function includeGeneratedAnnotation(): boolean | undefined {
         vscode.workspace.getConfiguration('java.code.generators').get('includeGeneratedAnnotation')
     );
 }
+
+export function fluentCallsNormalSetters(): boolean | undefined {
+    return (
+        vscode.workspace.getConfiguration('java.code.generators').has('fluentCallsNormalSetters') &&
+        vscode.workspace.getConfiguration('java.code.generators').get('fluentCallsNormalSetters')
+    );
+}

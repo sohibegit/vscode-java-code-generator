@@ -1,22 +1,23 @@
 'use strict';
-import * as vscode from 'vscode';
+import { commands, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
+import { getGuiHtml } from './gui';
 import { JavaClass } from './java-class';
 import {
-    getMethodOpeningBraceOnNewLine,
-    isIncludeFluentWithSetters,
+    fluentCallsNormalSetters,
     getFluentMethodPrefix,
+    getMethodOpeningBraceOnNewLine,
+    includeGeneratedAnnotation,
     isGenerateEvenIfExists,
-    isOnlyPrimitiveForToString,
+    isIncludeFluentWithSetters,
     isOnlyIdForHashAndEquals,
-    includeGeneratedAnnotation
+    isOnlyPrimitiveForToString,
 } from './settings';
-import { getGuiHtml } from './gui';
 let existsWarnings: string[] = [];
-export function activate(context: vscode.ExtensionContext) {
-    let onePanel: vscode.WebviewPanel;
-    let generateAll = vscode.commands.registerCommand('extension.javaGenerateAll', () => {
-        let editor = vscode.window.activeTextEditor!;
+export function activate(context: ExtensionContext) {
+    let onePanel: WebviewPanel;
+    let generateAll = commands.registerCommand('extension.javaGenerateAll', () => {
+        let editor = window.activeTextEditor!;
         getSelectedJavaClass(editor)
             .then(javaClass => {
                 let result = '';
@@ -36,27 +37,27 @@ export function activate(context: vscode.ExtensionContext) {
             });
     });
 
-    let generateConstructorCommand = vscode.commands.registerCommand('extension.javaGenerateConstructor', () => {
+    let generateConstructorCommand = commands.registerCommand('extension.javaGenerateConstructor', () => {
         runner(generateEmptyConstrucor);
     });
 
-    let generateConstructorUsingAllFinalFieldsCommand = vscode.commands.registerCommand('extension.javaGenerateConstructorUsingAllFinalFields', () => {
+    let generateConstructorUsingAllFinalFieldsCommand = commands.registerCommand('extension.javaGenerateConstructorUsingAllFinalFields', () => {
         runner(generateConstructorUsingAllFinalFields);
     });
 
-    let generateUsingGui = vscode.commands.registerCommand('extension.javaGenerateUsingGui', () => {
-        let editor = vscode.window.activeTextEditor!;
+    let generateUsingGui = commands.registerCommand('extension.javaGenerateUsingGui', () => {
+        let editor = window.activeTextEditor!;
         getSelectedJavaClass(editor)
             .then(javaClass => {
-                onePanel = vscode.window.createWebviewPanel('javaGenerator', 'Java Generator', vscode.ViewColumn.Two, {
-                    enableScripts: true
+                onePanel = window.createWebviewPanel('javaGenerator', 'Java Generator', ViewColumn.Two, {
+                    enableScripts: true,
                 });
 
-                onePanel.webview.html = getGuiHtml(javaClass);
+                onePanel.webview.html = getGuiHtml(javaClass, context);
 
                 onePanel.webview.onDidReceiveMessage(
                     (message: any) => {
-                        if (message.data.fields.length === 0) {
+                        if (message.data.fields.length === 0 && message.command !== 'constructorUsingFields') {
                             return;
                         }
                         javaClass.declerations = javaClass.declerations.filter(dic => {
@@ -106,6 +107,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 break;
                             }
                         }
+                        context.workspaceState.update('java-generate-setters-getters.autoClose', message.data.autoClose);
                         if (message.data.autoClose) {
                             onePanel.dispose();
                         }
@@ -122,10 +124,35 @@ export function activate(context: vscode.ExtensionContext) {
             });
     });
 
+    let generateGettersAndSettersCommand = commands.registerCommand('extension.javaGenerateGettersAndSetter', () => {
+        runner(generateGettersAndSetter);
+    });
+
+    let generateHashCodeAndEqualsCommand = commands.registerCommand('extension.javaGenerateHashCodeAndEquals', () => {
+        runner(generateHashCodeAndEquals);
+    });
+
+    let generateToStringCommand = commands.registerCommand('extension.javaGenerateToString', () => {
+        runner(generateToString);
+    });
+
+    let generateConstructorUsingFieldsCommand = commands.registerCommand('extension.javaGenerateConstructorUsingFields', () => {
+        runner(generateConstructorUsingFields);
+    });
+
+    let generateFluentSettersCommand = commands.registerCommand('extension.javaGenerateFluentSetters', () => {
+        runner(generateFluentSetters);
+    });
+
     context.subscriptions.push(generateAll);
     context.subscriptions.push(generateConstructorCommand);
     context.subscriptions.push(generateConstructorUsingAllFinalFieldsCommand);
     context.subscriptions.push(generateUsingGui);
+    context.subscriptions.push(generateGettersAndSettersCommand);
+    context.subscriptions.push(generateHashCodeAndEqualsCommand);
+    context.subscriptions.push(generateToStringCommand);
+    context.subscriptions.push(generateConstructorUsingFieldsCommand);
+    context.subscriptions.push(generateFluentSettersCommand);
 }
 
 function showExistsWarningIfFound() {
@@ -135,7 +162,7 @@ function showExistsWarningIfFound() {
     });
     warMessage = warMessage.replace(',', '');
     if (existsWarnings.length > 0) {
-        vscode.window.showWarningMessage('(' + warMessage + ') already exists');
+        window.showWarningMessage('(' + warMessage + ') already exists');
         existsWarnings = [];
     }
 }
@@ -196,7 +223,7 @@ function generateGettersAndSetter(javaClass: JavaClass): string {
                     result += `\n\tpublic ${javaClass.name} ${getFluentMethodPrefix() ? getFluentMethodPrefix() + it.variableNameFirstCapital() : it.variableName}(${
                         it.variableType
                     } ${it.variableName}) ${getMethodOpeningBraceOnNewLine()}{
-\t\tthis.${it.variableName} = ${it.variableName};
+\t\t${fluentCallsNormalSetters() ? 'set' + it.variableNameFirstCapital() + '(' + it.variableName + ')' : 'this.' + it.variableName + ' = ' + it.variableName};
 \t\treturn this;
 \t}\n`;
                 }
@@ -215,7 +242,7 @@ function generateFluentSetters(javaClass: JavaClass): string {
                 result += `\n\tpublic ${javaClass.name} ${getFluentMethodPrefix() ? getFluentMethodPrefix() + it.variableNameFirstCapital() : it.variableName}(${it.variableType} ${
                     it.variableName
                 }) ${getMethodOpeningBraceOnNewLine()}{
-\t\tthis.${it.variableName} = ${it.variableName};
+\t\t${fluentCallsNormalSetters() ? 'set' + it.variableNameFirstCapital() + '(' + it.variableName + ')' : 'this.' + it.variableName + ' = ' + it.variableName};
 \t\treturn this;
 \t}\n`;
             }
@@ -307,6 +334,8 @@ function generateToStringWithoutGettersOnlyPrimitives(javaClass: JavaClass): str
 }
 
 function generateConstructorUsingFields(javaClass: JavaClass): string {
+    console.log(javaClass.declerations.length);
+
     if (javaClass.declerations.length === 0) {
         return generateEmptyConstrucor(javaClass);
     }
@@ -445,7 +474,7 @@ function generateEmptyConstrucor(javaClass: JavaClass): string {
 }
 
 function runner(fun: any) {
-    let editor = vscode.window.activeTextEditor!;
+    let editor = window.activeTextEditor!;
     getSelectedJavaClass(editor)
         .then(javaClass => {
             insertSnippet(fun(javaClass), editor);

@@ -1,6 +1,7 @@
+import { ExtensionContext } from 'vscode';
 import { JavaClass } from './java-class';
 
-export function getGuiHtml(javaClass: JavaClass) {
+export function getGuiHtml(javaClass: JavaClass, context: ExtensionContext) {
     let guiHTML = /*html*/ `
     <!DOCTYPE html>
     <html lang="en">
@@ -82,10 +83,20 @@ export function getGuiHtml(javaClass: JavaClass) {
             <button class="button generate-button" onclick="generate('toStringWithoutGetters')">toString() without Getters()</button>
             <button class="button generate-button green-button" onclick="generate('all')">Generate All</button> <br />
             <hr />
-            <input type="checkbox" id="auto-close-check-box" name="auto-close" checked  /><strong>Auto close this Window after generating!</strong> 
+            <input type="checkbox" id="auto-close-check-box" name="auto-close" ${
+                context.workspaceState.get('java-generate-setters-getters.autoClose') ? 'checked' : ''
+            } /><strong>Auto close this Window after generating!</strong> 
         </form>
         <script>
             const vscode = acquireVsCodeApi();
+            
+            document.getElementById("auto-close-check-box").addEventListener('change', function() {
+                if (this.checked) {
+                    console.log("Checkbox is checked..");
+                } else {
+                    console.log("Checkbox is not checked..");
+                }
+            });
             function generate(command) {
 
                 var result = { fields: [] };
