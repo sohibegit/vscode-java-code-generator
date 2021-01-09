@@ -1,5 +1,11 @@
 # Change Log
 
+## [7.0.1] - 2021-01-08
+
+### Fixed
+
+-   multiple errors using the GUI without closing it
+
 ## [7.0.0] - 2021-01-08
 
 ### Added
