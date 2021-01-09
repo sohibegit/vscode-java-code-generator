@@ -74,6 +74,7 @@ export function getGuiHtml(javaClass: JavaClass, context: ExtensionContext) {
 
     guiHTML += /*html*/ `
             <hr />
+            <button class="button generate-button" onclick="generate('emptyConstructor')">Empty Constructor</button> 
             <button class="button generate-button" onclick="generate('constructorUsingFields')">Constructor Using Fields</button> 
             <button class="button generate-button" onclick="generate('gettersAndSetters')">Getters() And Setters()</button> 
             <button class="button generate-button" onclick="generate('javaGenerateFluentSetters')">Fluent Setters()</button> 
@@ -90,19 +91,12 @@ export function getGuiHtml(javaClass: JavaClass, context: ExtensionContext) {
         <script>
             const vscode = acquireVsCodeApi();
             
-            document.getElementById("auto-close-check-box").addEventListener('change', function() {
-                if (this.checked) {
-                    console.log("Checkbox is checked..");
-                } else {
-                    console.log("Checkbox is not checked..");
-                }
-            });
             function generate(command) {
 
                 var result = { fields: [] };
                 result.autoClose = document.getElementById("auto-close-check-box").checked;
                 Array.prototype.forEach.call(document.forms[0].elements, function(element) {
-                    if (element.checked) {
+                    if (element.checked && element.name !== 'select-all') {
                         result.fields.push(element.name);
                     }
                 });

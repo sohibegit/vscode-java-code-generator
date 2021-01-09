@@ -1,4 +1,5 @@
 'use strict';
+import * as path from 'path';
 import { commands, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
 import { getGuiHtml } from './gui';
@@ -21,7 +22,7 @@ export function activate(context: ExtensionContext) {
         getSelectedJavaClass(editor)
             .then(javaClass => {
                 let result = '';
-                result += generateEmptyConstrucor(javaClass);
+                result += generateEmptyConstructor(javaClass);
                 result += generateConstructorUsingFields(javaClass);
                 result += generateGettersAndSetter(javaClass);
                 if (!isIncludeFluentWithSetters()) {
@@ -38,7 +39,7 @@ export function activate(context: ExtensionContext) {
     });
 
     let generateConstructorCommand = commands.registerCommand('extension.javaGenerateConstructor', () => {
-        runner(generateEmptyConstrucor);
+        runner(generateEmptyConstructor);
     });
 
     let generateConstructorUsingAllFinalFieldsCommand = commands.registerCommand('extension.javaGenerateConstructorUsingAllFinalFields', () => {
@@ -49,15 +50,22 @@ export function activate(context: ExtensionContext) {
         let editor = window.activeTextEditor!;
         getSelectedJavaClass(editor)
             .then(javaClass => {
-                onePanel = window.createWebviewPanel('javaGenerator', 'Java Generator', ViewColumn.Two, {
-                    enableScripts: true,
-                });
-
+                onePanel = window.createWebviewPanel(
+                    'javaGenerator',
+                    path.basename(editor.document.uri.fsPath),
+                    { viewColumn: ViewColumn.Two, preserveFocus: true },
+                    {
+                        enableScripts: true,
+                    }
+                );
+                // let fullClass = Object.assign({}, javaClass);
                 onePanel.webview.html = getGuiHtml(javaClass, context);
-
                 onePanel.webview.onDidReceiveMessage(
-                    (message: any) => {
-                        if (message.data.fields.length === 0 && message.command !== 'constructorUsingFields') {
+                    async (message: any) => {
+                        let neededFields = message.data.fields;
+                        javaClass = await getSelectedJavaClass(editor, neededFields);
+                        if (message.data.fields.length === 0 && message.command !== 'emptyConstructor') {
+                            window.showWarningMessage('please select at least one field');
                             return;
                         }
                         javaClass.declerations = javaClass.declerations.filter(dic => {
@@ -75,6 +83,10 @@ export function activate(context: ExtensionContext) {
                             }
                             case 'constructorUsingFields': {
                                 insertSnippet(generateConstructorUsingFields(javaClass), editor);
+                                break;
+                            }
+                            case 'emptyConstructor': {
+                                insertSnippet(generateEmptyConstructor(javaClass), editor);
                                 break;
                             }
                             case 'hashCodeAndEquals': {
@@ -95,7 +107,7 @@ export function activate(context: ExtensionContext) {
                             }
                             case 'all': {
                                 let result = '';
-                                result += generateEmptyConstrucor(javaClass);
+                                result += generateEmptyConstructor(javaClass);
                                 result += generateConstructorUsingFields(javaClass);
                                 result += generateGettersAndSetter(javaClass);
                                 if (!isIncludeFluentWithSetters()) {
@@ -112,7 +124,6 @@ export function activate(context: ExtensionContext) {
                             onePanel.dispose();
                         }
                         showExistsWarningIfFound();
-
                         return;
                     },
                     undefined,
@@ -333,11 +344,22 @@ function generateToStringWithoutGettersOnlyPrimitives(javaClass: JavaClass): str
     return result.replace(',', '');
 }
 
-function generateConstructorUsingFields(javaClass: JavaClass): string {
-    console.log(javaClass.declerations.length);
+function generateEmptyConstructor(javaClass: JavaClass): string {
+    if (isGenerateEvenIfExists() || !javaClass.hasEmptyConstructor) {
+        let result = '';
+        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
+        result += `\n\tpublic ${javaClass.name}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
+        return result;
+    } else {
+        existsWarnings.push('Empty Constructor');
+        return '';
+    }
+}
 
-    if (javaClass.declerations.length === 0) {
-        return generateEmptyConstrucor(javaClass);
+function generateConstructorUsingFields(javaClass: JavaClass): string {
+    if (javaClass.hasNoneEmptyConstructor) {
+        existsWarnings.push('Constructor Using Fields');
+        return '';
     }
     let result = '';
     result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
@@ -359,7 +381,7 @@ function generateConstructorUsingFields(javaClass: JavaClass): string {
 
 function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
     if (!javaClass.hasAnyFinalField()) {
-        return generateEmptyConstrucor(javaClass);
+        return generateEmptyConstructor(javaClass);
     }
     let result = `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
@@ -459,18 +481,6 @@ function generateHashCodeAndEqualsOnlyId(javaClass: JavaClass): string {
         existsWarnings.push('hashCode');
     }
     return result;
-}
-
-function generateEmptyConstrucor(javaClass: JavaClass): string {
-    if (isGenerateEvenIfExists() || !javaClass.hasEmptyConstructor) {
-        let result = '';
-        result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
-        result += `\n\tpublic ${javaClass.name}() ${getMethodOpeningBraceOnNewLine()}{\n\t}\n`;
-        return result;
-    } else {
-        existsWarnings.push('Empty Constructor');
-        return '';
-    }
 }
 
 function runner(fun: any) {

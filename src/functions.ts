@@ -1,5 +1,6 @@
 import { parse } from 'java-ast';
 import { ClassBodyDeclarationContext, ModifierContext, TypeDeclarationContext, VariableDeclaratorContext } from 'java-ast/dist/parser/JavaParser';
+import { compact, isEqual } from 'lodash-es';
 import * as vscode from 'vscode';
 import { Decleration } from './decleration';
 import { JavaClass } from './java-class';
@@ -18,7 +19,7 @@ export function insertSnippet(snippet: string, editor: vscode.TextEditor) {
     editor.insertSnippet(new vscode.SnippetString(snippet), new vscode.Position(editor.selection.end.line + newLines, 0));
 }
 
-export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined): Promise<JavaClass> {
+export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined, neededFields?: any): Promise<JavaClass> {
     const javaClasses: JavaClass[] = [];
     let selectedText = '';
     if (editor) {
@@ -40,6 +41,23 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                 className = type.classDeclaration()!.IDENTIFIER()!.text;
             } catch (error) {}
             try {
+                let params = compact(
+                    type
+                        .classDeclaration()!
+                        .classBody()
+                        .classBodyDeclaration()
+                        .map(itit => {
+                            try {
+                                return itit
+                                    .memberDeclaration()!
+                                    .fieldDeclaration()!
+                                    .variableDeclarators()!
+                                    .variableDeclarator()!
+                                    .map(it => it.variableDeclaratorId().text)[0];
+                            } catch (error) {}
+                        })
+                );
+
                 type.classDeclaration()!
                     .classBody()!
                     .classBodyDeclaration()
@@ -48,15 +66,21 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                             if (classBodyDeclaration.memberDeclaration()!.constructorDeclaration()!.formalParameters()!.formalParameterList() === undefined) {
                                 hasEmptyConstructor = true;
                             } else {
-                                hasNoneEmptyConstructor = true;
+                                const constructorParams = classBodyDeclaration
+                                    .memberDeclaration()!
+                                    .constructorDeclaration()!
+                                    .formalParameters()!
+                                    .formalParameterList()!
+                                    .formalParameter()!
+                                    .map(it => it.variableDeclaratorId().text);
+
+                                hasNoneEmptyConstructor = hasNoneEmptyConstructor || isEqual((neededFields || params).sort(), constructorParams.sort());
                             }
                         } catch (error) {}
 
                         try {
                             methodsNames.push(classBodyDeclaration.memberDeclaration()!.methodDeclaration()!.IDENTIFIER()!.text);
-                        } catch (error) {
-                            // console.error(error);
-                        }
+                        } catch (error) {}
 
                         try {
                             let isStatic = false;
@@ -105,9 +129,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
                                         )
                                     );
                             }
-                        } catch (error) {
-                            console.error(error);
-                        }
+                        } catch (error) {}
                     });
             } catch (error) {
                 console.error(error);
