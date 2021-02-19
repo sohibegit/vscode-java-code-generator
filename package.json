@@ -24,8 +24,7 @@
         "Snippets"
     ],
     "activationEvents": [
-        "resourceLangId == java",
-        "onLanguage:java"
+        "onStartupFinished"
     ],
     "main": "./dist/extension",
     "contributes": {
