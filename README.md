@@ -1,5 +1,5 @@
 # Java Code Generators
-
+<a href="https://www.buymeacoffee.com/sohibe" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 ## Features
 
 -   Generator GUI
@@ -13,9 +13,3 @@
 ## Usage
 
 ![how use](images/usagev4.gif)
-
----
-
-If this extension helped you, consider helping me by donating
-
-<a href="https://donorbox.org/vscode-java-code-generators" target="_blank"><img src="https://d1iczxrky3cnb2.cloudfront.net/button-large-blue.png" /></a>
