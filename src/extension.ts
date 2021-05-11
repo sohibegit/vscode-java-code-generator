@@ -183,18 +183,17 @@ export function deactivate() {}
 function generateOnlyGetters(javaClass: JavaClass): string {
     let result = '';
     javaClass.declerations.forEach(it => {
-        if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
-            result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
-\t\treturn this.${it.variableName};
-\t}\n`;
-        }
-
         if (it.isBoolean()) {
             if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`is${it.variableNameFirstCapital()}`) === -1) {
                 result += `\n\tpublic ${it.variableType} is${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
 \t}\n`;
             }
+        }
+        else if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
+            result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
+\t\treturn this.${it.variableName};
+\t}\n`;
         }
     });
     return result;
@@ -212,7 +211,7 @@ function generateGettersAndSetter(javaClass: JavaClass): string {
 \t}\n`;
             }
         }
-        if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
+        else if (isGenerateEvenIfExists() || javaClass.methodNames.indexOf(`get${it.variableNameFirstCapital()}`) === -1) {
             result += it.annotation ? `\n\t${it.annotation}` : '';
             result += `\n\tpublic ${it.variableType} get${it.variableNameFirstCapital()}() ${getMethodOpeningBraceOnNewLine()}{
 \t\treturn this.${it.variableName};
