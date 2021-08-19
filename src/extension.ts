@@ -1,5 +1,4 @@
 'use strict';
-import * as path from 'path';
 import { commands, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
 import { getGuiHtml } from './gui';
@@ -12,7 +11,7 @@ import {
     isGenerateEvenIfExists,
     isIncludeFluentWithSetters,
     isOnlyIdForHashAndEquals,
-    isOnlyPrimitiveForToString,
+    isOnlyPrimitiveForToString
 } from './settings';
 let existsWarnings: string[] = [];
 export function activate(context: ExtensionContext) {
@@ -52,7 +51,7 @@ export function activate(context: ExtensionContext) {
             .then(javaClass => {
                 onePanel = window.createWebviewPanel(
                     'javaGenerator',
-                    path.basename(editor.document.uri.fsPath),
+                    "Java Code Generator",
                     { viewColumn: ViewColumn.Two, preserveFocus: true },
                     {
                         enableScripts: true,
