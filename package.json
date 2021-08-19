@@ -2,7 +2,7 @@
     "name": "java-generate-setters-getters",
     "displayName": "Java Code Generators",
     "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
-    "version": "7.0.3",
+    "version": "7.1.0",
     "publisher": "sohibe",
     "license": "MIT",
     "keywords": [
@@ -27,6 +27,7 @@
         "onStartupFinished"
     ],
     "main": "./dist/extension",
+    "browser": "./dist/extension",
     "contributes": {
         "commands": [
             {
