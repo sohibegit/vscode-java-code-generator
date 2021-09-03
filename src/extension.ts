@@ -1,5 +1,5 @@
 'use strict';
-import { commands, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
+import { commands, ExtensionContext, Position, ViewColumn, WebviewPanel, window } from 'vscode';
 import { getSelectedJavaClass, insertSnippet } from './functions';
 import { getGuiHtml } from './gui';
 import { JavaClass } from './java-class';
@@ -11,7 +11,7 @@ import {
     isGenerateEvenIfExists,
     isIncludeFluentWithSetters,
     isOnlyIdForHashAndEquals,
-    isOnlyPrimitiveForToString
+    isOnlyPrimitiveForToString,
 } from './settings';
 let existsWarnings: string[] = [];
 export function activate(context: ExtensionContext) {
@@ -41,6 +41,22 @@ export function activate(context: ExtensionContext) {
         runner(generateEmptyConstructor);
     });
 
+    let generateLoggerDebugSelectedText = commands.registerCommand('extension.javaGenerateLoggerDebug', () => {
+        var editor = window.activeTextEditor;
+        if (!editor) {
+            return; // No open text editor
+        }
+        var selection = editor.selection;
+        var text = editor.document.getText(selection);
+        editor.edit(it => {
+            it.insert(
+                new Position(selection.active.line, editor!.document.lineAt(selection.active.line).range.end.character),
+                `
+    log.debug("${text}: {}",${text});`
+            );
+        });
+    });
+
     let generateConstructorUsingAllFinalFieldsCommand = commands.registerCommand('extension.javaGenerateConstructorUsingAllFinalFields', () => {
         runner(generateConstructorUsingAllFinalFields);
     });
@@ -51,7 +67,7 @@ export function activate(context: ExtensionContext) {
             .then(javaClass => {
                 onePanel = window.createWebviewPanel(
                     'javaGenerator',
-                    "Java Code Generator",
+                    'Java Code Generator',
                     { viewColumn: ViewColumn.Two, preserveFocus: true },
                     {
                         enableScripts: true,
@@ -156,6 +172,7 @@ export function activate(context: ExtensionContext) {
 
     context.subscriptions.push(generateAll);
     context.subscriptions.push(generateConstructorCommand);
+    context.subscriptions.push(generateLoggerDebugSelectedText);
     context.subscriptions.push(generateConstructorUsingAllFinalFieldsCommand);
     context.subscriptions.push(generateUsingGui);
     context.subscriptions.push(generateGettersAndSettersCommand);

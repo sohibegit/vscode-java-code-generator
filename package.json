@@ -65,6 +65,10 @@
             {
                 "command": "extension.javaGenerateConstructorUsingFields",
                 "title": "Generate Constructor Using All Fields"
+            },
+            {
+                "command": "extension.javaGenerateLoggerDebug",
+                "title": "Generate Logger Debug of any selected text"
             }
         ],
         "menus": {
@@ -120,6 +124,11 @@
                     "when": "resourceLangId == java",
                     "command": "extension.javaGenerateConstructorUsingFields",
                     "group": "constructor@3"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateLoggerDebug",
+                    "group": "debug@1"
                 }
             ]
         },
@@ -194,7 +203,6 @@
     },
     "devDependencies": {
         "@types/lodash-es": "^4.17.4",
-        "@types/mocha": "^2.2.42",
         "@types/node": "^7.0.43",
         "@types/vscode": "^1.42.0",
         "husky": "4.3.6",

@@ -1,5 +1,11 @@
 # Change Log
 
+## [7.3.0] - 2021-09-04
+
+### Added
+
+-   added new option to Generate Logger Debug of any selected text like `log.debug("selectedText: {}", selectedText);`
+
 ## [7.0.1] - 2021-01-08
 
 ### Fixed

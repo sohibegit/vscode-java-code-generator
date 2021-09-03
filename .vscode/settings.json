@@ -8,5 +8,6 @@
     },
     "typescript.tsdk": "node_modules/typescript/lib",
     "typescript.suggest.completeFunctionCalls": true,
-    "javascript.suggest.completeFunctionCalls": true
+    "javascript.suggest.completeFunctionCalls": true,
+    "editor.formatOnSave": true
 }
