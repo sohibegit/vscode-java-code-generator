@@ -1,5 +1,15 @@
 # Change Log
 
+## [7.4.0] - 2021-09-04
+
+### Added
+
+-   added new Beta or Experimental menu that includes
+
+        Generate Lombok @RequiredArgsConstructor and @Slf4j
+        Generate Lombok @Data @Accessors @EqualsAndHashCode
+        Generate Lombok @Slf4j
+
 ## [7.3.0] - 2021-09-04
 
 ### Added

@@ -69,10 +69,27 @@
             {
                 "command": "extension.javaGenerateLoggerDebug",
                 "title": "Generate Logger Debug of any selected text"
+            },
+            {
+                "command": "extension.javaGenerateLombok",
+                "title": "Generate Lombok @RequiredArgsConstructor and @Slf4j"
+            },
+            {
+                "command": "extension.javaGenerateLombokDataAccessorsHash",
+                "title": "Generate Lombok @Data @Accessors @EqualsAndHashCode"
+            },
+            {
+                "command": "extension.javaGenerateLombokSlf4j",
+                "title": "Generate Lombok @Slf4j"
             }
         ],
         "menus": {
             "editor/context": [
+                {
+                    "submenu": "generators/editor/beta",
+                    "group": "YourGroup@4",
+                    "when": "resourceLangId == java && includeBeta"
+                },
                 {
                     "submenu": "generators/editor/annotations",
                     "group": "YourGroup@3",
@@ -87,6 +104,23 @@
                     "when": "resourceLangId == java",
                     "command": "extension.javaGenerateAll",
                     "group": "YourGroup@1"
+                }
+            ],
+            "generators/editor/beta": [
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateLombok",
+                    "group": "constructor@1"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateLombokDataAccessorsHash",
+                    "group": "constructor@2"
+                },
+                {
+                    "when": "resourceLangId == java",
+                    "command": "extension.javaGenerateLombokSlf4j",
+                    "group": "constructor@3"
                 }
             ],
             "generators/editor/annotations": [
@@ -136,6 +170,10 @@
             {
                 "id": "generators/editor/annotations",
                 "label": "Java Code Generators"
+            },
+            {
+                "id": "generators/editor/beta",
+                "label": "Beta Or Experimental"
             }
         ],
         "configuration": [
@@ -186,6 +224,11 @@
                         "type": "boolean",
                         "default": true,
                         "description": "Fluent Setters calls normal Setters"
+                    },
+                    "java.code.generators.includeBeta": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Include Beta or Experimental stuff"
                     }
                 }
             }
@@ -206,7 +249,7 @@
         "@types/node": "^7.0.43",
         "@types/vscode": "^1.42.0",
         "husky": "4.3.6",
-        "prettier": "2.2.1",
+        "prettier": "2.4.1",
         "ts-loader": "^8.0.13",
         "tslint": "6.1.3",
         "typescript": "4.1.3",

@@ -1,12 +1,13 @@
 'use strict';
 import { commands, ExtensionContext, Position, ViewColumn, WebviewPanel, window } from 'vscode';
-import { getSelectedJavaClass, insertSnippet } from './functions';
+import { classDeclarationLine, getSelectedJavaClass, idFieldLine, insertSnippet, lastConstructorLine, lastImportLocation } from './functions';
 import { getGuiHtml } from './gui';
 import { JavaClass } from './java-class';
 import {
     fluentCallsNormalSetters,
     getFluentMethodPrefix,
     getMethodOpeningBraceOnNewLine,
+    includeBeta,
     includeGeneratedAnnotation,
     isGenerateEvenIfExists,
     isIncludeFluentWithSetters,
@@ -15,9 +16,13 @@ import {
 } from './settings';
 let existsWarnings: string[] = [];
 export function activate(context: ExtensionContext) {
+    commands.executeCommand('setContext', 'includeBeta', includeBeta());
+
     let onePanel: WebviewPanel;
     let generateAll = commands.registerCommand('extension.javaGenerateAll', () => {
         let editor = window.activeTextEditor!;
+        lastConstructorLine(editor);
+
         getSelectedJavaClass(editor)
             .then(javaClass => {
                 let result = '';
@@ -170,6 +175,18 @@ export function activate(context: ExtensionContext) {
         runner(generateFluentSetters);
     });
 
+    let generateLombokCommand = commands.registerCommand('extension.javaGenerateLombok', () => {
+        generateLombok();
+    });
+
+    let generateLombokDataAccessorsHashCommand = commands.registerCommand('extension.javaGenerateLombokDataAccessorsHash', () => {
+        generateLombokDataAccessorsHash();
+    });
+
+    let generateLombokSlf4jCommand = commands.registerCommand('extension.javaGenerateLombokSlf4j', () => {
+        generateLombokSlf4j();
+    });
+
     context.subscriptions.push(generateAll);
     context.subscriptions.push(generateConstructorCommand);
     context.subscriptions.push(generateLoggerDebugSelectedText);
@@ -180,6 +197,9 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(generateToStringCommand);
     context.subscriptions.push(generateConstructorUsingFieldsCommand);
     context.subscriptions.push(generateFluentSettersCommand);
+    context.subscriptions.push(generateLombokCommand);
+    context.subscriptions.push(generateLombokDataAccessorsHashCommand);
+    context.subscriptions.push(generateLombokSlf4jCommand);
 }
 
 function showExistsWarningIfFound() {
@@ -509,4 +529,39 @@ function runner(fun: any) {
         .catch(err => {
             console.error(err);
         });
+}
+
+function generateLombok() {
+    const editor = window.activeTextEditor;
+    let importLine = lastImportLocation(editor)!;
+    let classLine = classDeclarationLine(editor)!;
+    editor?.edit(edit => {
+        edit.insert(new Position(importLine, 0), 'import lombok.RequiredArgsConstructor;\nimport lombok.extern.slf4j.Slf4j;\n');
+        edit.insert(new Position(classLine - 1, 0), '@RequiredArgsConstructor\n@Slf4j\n');
+    });
+}
+
+function generateLombokDataAccessorsHash() {
+    const editor = window.activeTextEditor;
+    let importLine = lastImportLocation(editor)!;
+    let classLine = classDeclarationLine(editor)!;
+    let idLine = idFieldLine(editor);
+
+    editor?.edit(edit => {
+        edit.insert(new Position(importLine, 0), 'import lombok.Data;\nimport lombok.EqualsAndHashCode;\nimport lombok.experimental.Accessors;\n');
+        edit.insert(new Position(classLine - 1, 0), '@Data\n@Accessors(chain = true)\n@EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)\n');
+        if (idLine && idLine > 0) {
+            edit.insert(new Position(idLine - 1, 0), '    @EqualsAndHashCode.Include\n');
+        }
+    });
+}
+
+function generateLombokSlf4j() {
+    const editor = window.activeTextEditor;
+    let importLine = lastImportLocation(editor)!;
+    let classLine = classDeclarationLine(editor)!;
+    editor?.edit(edit => {
+        edit.insert(new Position(importLine, 0), 'import lombok.extern.slf4j.Slf4j;\n');
+        edit.insert(new Position(classLine - 1, 0), '@Slf4j\n');
+    });
 }

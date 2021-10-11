@@ -31,6 +31,7 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
             vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
             return Promise.reject('error parsing the Java class check for syntax errors');
         }
+
         parsedCode.typeDeclaration().forEach((type: TypeDeclarationContext) => {
             let declerations: Decleration[] = [];
             let className = '';
@@ -140,16 +141,13 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
             javaClasses.push(new JavaClass(className, declerations, methodsNames, hasEmptyConstructor, hasNoneEmptyConstructor));
         });
     }
-
     if (javaClasses.length === 0) {
         vscode.window.showErrorMessage('error parsing the Java class please file an issue');
         return Promise.reject('error parsing the Java class please file an issue');
     }
-
     if (javaClasses.length === 1) {
         return javaClasses[0];
     }
-
     let items: vscode.QuickPickItem[] = [];
 
     javaClasses!.forEach(javaClass => {
@@ -162,14 +160,144 @@ export async function getSelectedJavaClass(editor: vscode.TextEditor | undefined
         canPickMany: false,
         placeHolder: 'please pick...',
     });
-
     for (let index = 0; index < javaClasses.length; index++) {
         const javaClass = javaClasses[index];
         if (name && javaClass.name === name.label) {
             return javaClass;
         }
     }
-
     vscode.window.showErrorMessage('error parsing the Java class please file an issue');
     return Promise.reject('error parsing the Java class please file an issue');
 }
+
+export function lastImportLocation(editor: vscode.TextEditor | undefined): number | undefined {
+    if (editor) {
+        try {
+            const parsedCode = parse(editor.document.getText());
+            return parsedCode.importDeclaration().pop()?.stop?.line || parsedCode.packageDeclaration()?.stop?.line;
+        } catch (error) {
+            vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+            Promise.reject('error parsing the Java class check for syntax errors');
+        }
+    }
+}
+
+export function classDeclarationLine(editor: vscode.TextEditor | undefined): number | undefined {
+    if (editor) {
+        try {
+            const parsedCode = parse(editor.document.getText());
+            return parsedCode.typeDeclaration().pop()?.classDeclaration()?.start?.line;
+        } catch (error) {
+            vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+            Promise.reject('error parsing the Java class check for syntax errors');
+        }
+    }
+}
+
+// FIXME: not finished yet
+export function lastConstructorLine(editor: vscode.TextEditor | undefined): number | undefined {
+    if (editor) {
+        try {
+            const parsedCode = parse(editor.document.getText());
+            const classBodyDec = parsedCode.typeDeclaration().pop()?.classDeclaration()?.classBody().classBodyDeclaration();
+            if (classBodyDec) {
+                for (const iterator of classBodyDec) {
+                    console.log(iterator.memberDeclaration()?.constructorDeclaration());
+                }
+            }
+            return parsedCode.typeDeclaration().pop()?.classDeclaration()?.start?.line;
+        } catch (error) {
+            vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+            Promise.reject('error parsing the Java class check for syntax errors');
+        }
+    }
+}
+
+export function idFieldLine(editor: vscode.TextEditor | undefined): number | undefined {
+    if (editor) {
+        try {
+            const parsedCode = parse(editor.document.getText());
+            const classBodyDec = parsedCode.typeDeclaration().pop()?.classDeclaration()?.classBody().classBodyDeclaration();
+            if (classBodyDec) {
+                for (const iterator of classBodyDec) {
+                    const vars = iterator.memberDeclaration()?.fieldDeclaration()?.variableDeclarators();
+                    if (vars?.text === 'id') {
+                        return vars.start?.line;
+                    }
+                }
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+            Promise.reject('error parsing the Java class check for syntax errors');
+        }
+    }
+}
+
+// export async function newWay(editor: vscode.TextEditor | undefined, neededFields?: any): Promise<string> {
+//     if (editor) {
+//         let resultCode = '';
+//         const selectedText = editor.document.getText() || '';
+//         let parsedCode;
+//         try {
+//             parsedCode = parse(selectedText);
+//         } catch (error) {
+//             vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+//             return Promise.reject('error parsing the Java class check for syntax errors');
+//         }
+//         // if (parsedCode.children) {
+//         //     for (const child of parsedCode.children) {
+//         //         if (child.payload instanceof PackageDeclarationContext) {
+//         //             console.log(child);
+
+//         //             resultCode += 'package ' + (child as PackageDeclarationContext).getChild(1).text + ';\n\n';
+//         //         } else if (child.payload instanceof ImportDeclarationContext) {
+//         //             resultCode += 'import ' + (child as ImportDeclarationContext).getChild(1).text + ';\n';
+//         //         } else if (child.payload instanceof TypeDeclarationContext) {
+//         //             resultCode += '\n';
+//         //             const typeDecs = (child as TypeDeclarationContext).children;
+//         //             if (typeDecs) {
+//         //                 for (const typeDec of typeDecs) {
+//         //                     const classOrInteModi = (typeDec as ClassOrInterfaceModifierContext).children;
+//         //                     if (classOrInteModi) {
+//         //                         for (const classOr of classOrInteModi) {
+//         //                             if (classOr instanceof AnnotationContext) {
+//         //                                 resultCode += classOr.text + '\n';
+//         //                             } else if (classOr instanceof ClassBodyContext) {
+//         //                                 resultCode += '{\n';
+//         //                                 // console.log(classOr);
+//         //                                 resultCode += '\n}';
+//         //                             } else {
+//         //                                 resultCode += classOr.text + ' ';
+//         //                             }
+//         //                         }
+//         //                     }
+//         //                 }
+//         //             }
+//         //         } else {
+//         //             // console.log(child);
+//         //         }
+//         //     }
+//         // }
+
+//         // resultCode = resolveTree(parsedCode);
+
+//         return Promise.resolve(resultCode);
+//     }
+//     vscode.window.showErrorMessage('error parsing the Java class please file an issue');
+//     return Promise.reject('error parsing the Java class please file an issue');
+// }
+
+// function resolveTree(parsedCode: any): string {
+//     let result = '';
+//     if (parsedCode.children) {
+//         for (const child of parsedCode.children) {
+//             result += resolveTree(child);
+//         }
+//     } else {
+//         console.log(parsedCode.payload);
+//         if (parsedCode.type !== -1) {
+//             result += parsedCode.text;
+//         }
+//     }
+//     return result;
+// }
