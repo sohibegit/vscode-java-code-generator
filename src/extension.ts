@@ -1,6 +1,6 @@
 'use strict';
-import { commands, ExtensionContext, Position, ViewColumn, WebviewPanel, window } from 'vscode';
-import { classDeclarationLine, getSelectedJavaClass, idFieldLine, insertSnippet, lastConstructorLine, lastImportLocation } from './functions';
+import { commands, ExtensionContext, OutputChannel, Position, ViewColumn, WebviewPanel, window } from 'vscode';
+import { classDeclarationLine, getSelectedJavaClass, idFieldLine, importsHas, insertSnippet, lastImportLocation } from './functions';
 import { getGuiHtml } from './gui';
 import { JavaClass } from './java-class';
 import {
@@ -15,13 +15,22 @@ import {
     isOnlyPrimitiveForToString,
 } from './settings';
 let existsWarnings: string[] = [];
+let log: OutputChannel;
+
 export function activate(context: ExtensionContext) {
     commands.executeCommand('setContext', 'includeBeta', includeBeta());
+    log = window.createOutputChannel('JavaCodeGenerator');
+    log.show();
 
     let onePanel: WebviewPanel;
-    let generateAll = commands.registerCommand('extension.javaGenerateAll', () => {
+    let generateAll = commands.registerCommand('extension.javaGenerateAll', async () => {
         let editor = window.activeTextEditor!;
-        lastConstructorLine(editor);
+        if (!importsHas(editor, 'import java.util.Objects;')) {
+            let importLine = lastImportLocation(editor)!;
+            editor?.edit(edit => {
+                edit.insert(new Position(importLine, 0), 'import java.util.Objects;\n');
+            });
+        }
 
         getSelectedJavaClass(editor)
             .then(javaClass => {
@@ -393,13 +402,20 @@ function generateEmptyConstructor(javaClass: JavaClass): string {
 }
 
 function generateConstructorUsingFields(javaClass: JavaClass): string {
+    log.appendLine('1');
+
     if (javaClass.hasNoneEmptyConstructor) {
+        log.appendLine('2');
         existsWarnings.push('Constructor Using Fields');
         return '';
     }
+    log.appendLine('3');
+
     let result = '';
     result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
     result += `\n\tpublic ${javaClass.name}(`;
+    log.appendLine(result);
+
     javaClass.declerations.forEach(it => {
         if (!it.isFinalValueAlradySet) {
             result += `${it.variableType} ${it.variableName}, `;
@@ -416,9 +432,13 @@ function generateConstructorUsingFields(javaClass: JavaClass): string {
 }
 
 function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
+    console.log('1');
     if (!javaClass.hasAnyFinalField()) {
+        console.log('2');
         return generateEmptyConstructor(javaClass);
     }
+    console.log('3');
+
     let result = `\n\tpublic ${javaClass.name}(`;
     javaClass.declerations.forEach(it => {
         if (it.isFinal && !it.isFinalValueAlradySet) {

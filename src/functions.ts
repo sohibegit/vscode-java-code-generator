@@ -182,6 +182,20 @@ export function lastImportLocation(editor: vscode.TextEditor | undefined): numbe
     }
 }
 
+export function importsHas(editor: vscode.TextEditor | undefined, text: string): boolean | undefined {
+    if (editor) {
+        try {
+            const parsedCode = parse(editor.document.getText());
+            console.log(parsedCode.importDeclaration().pop());
+
+            return false;
+        } catch (error) {
+            vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
+            Promise.reject('error parsing the Java class check for syntax errors');
+        }
+    }
+}
+
 export function classDeclarationLine(editor: vscode.TextEditor | undefined): number | undefined {
     if (editor) {
         try {
@@ -232,72 +246,3 @@ export function idFieldLine(editor: vscode.TextEditor | undefined): number | und
         }
     }
 }
-
-// export async function newWay(editor: vscode.TextEditor | undefined, neededFields?: any): Promise<string> {
-//     if (editor) {
-//         let resultCode = '';
-//         const selectedText = editor.document.getText() || '';
-//         let parsedCode;
-//         try {
-//             parsedCode = parse(selectedText);
-//         } catch (error) {
-//             vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
-//             return Promise.reject('error parsing the Java class check for syntax errors');
-//         }
-//         // if (parsedCode.children) {
-//         //     for (const child of parsedCode.children) {
-//         //         if (child.payload instanceof PackageDeclarationContext) {
-//         //             console.log(child);
-
-//         //             resultCode += 'package ' + (child as PackageDeclarationContext).getChild(1).text + ';\n\n';
-//         //         } else if (child.payload instanceof ImportDeclarationContext) {
-//         //             resultCode += 'import ' + (child as ImportDeclarationContext).getChild(1).text + ';\n';
-//         //         } else if (child.payload instanceof TypeDeclarationContext) {
-//         //             resultCode += '\n';
-//         //             const typeDecs = (child as TypeDeclarationContext).children;
-//         //             if (typeDecs) {
-//         //                 for (const typeDec of typeDecs) {
-//         //                     const classOrInteModi = (typeDec as ClassOrInterfaceModifierContext).children;
-//         //                     if (classOrInteModi) {
-//         //                         for (const classOr of classOrInteModi) {
-//         //                             if (classOr instanceof AnnotationContext) {
-//         //                                 resultCode += classOr.text + '\n';
-//         //                             } else if (classOr instanceof ClassBodyContext) {
-//         //                                 resultCode += '{\n';
-//         //                                 // console.log(classOr);
-//         //                                 resultCode += '\n}';
-//         //                             } else {
-//         //                                 resultCode += classOr.text + ' ';
-//         //                             }
-//         //                         }
-//         //                     }
-//         //                 }
-//         //             }
-//         //         } else {
-//         //             // console.log(child);
-//         //         }
-//         //     }
-//         // }
-
-//         // resultCode = resolveTree(parsedCode);
-
-//         return Promise.resolve(resultCode);
-//     }
-//     vscode.window.showErrorMessage('error parsing the Java class please file an issue');
-//     return Promise.reject('error parsing the Java class please file an issue');
-// }
-
-// function resolveTree(parsedCode: any): string {
-//     let result = '';
-//     if (parsedCode.children) {
-//         for (const child of parsedCode.children) {
-//             result += resolveTree(child);
-//         }
-//     } else {
-//         console.log(parsedCode.payload);
-//         if (parsedCode.type !== -1) {
-//             result += parsedCode.text;
-//         }
-//     }
-//     return result;
-// }
