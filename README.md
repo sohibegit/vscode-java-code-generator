@@ -12,6 +12,7 @@
 -   Generate Equals And HashCode
 -   Generate Fluent Setters
 -   Generate Logger Debug
+-   Generate SerialVersionUID
 
 ## Usage
 

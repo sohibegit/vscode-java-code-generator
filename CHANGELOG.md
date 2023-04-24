@@ -4,6 +4,17 @@
 
 ### Added
 
+-   added new Generate SerialVersionUID
+-   auto import java.util.Objects when generating equals
+
+### Fixed
+
+-   multiple issues when generating a Class with only static fields
+
+## [7.4.0] - 2021-09-04
+
+### Added
+
 -   added new Beta or Experimental menu that includes
 
         Generate Lombok @RequiredArgsConstructor and @Slf4j
