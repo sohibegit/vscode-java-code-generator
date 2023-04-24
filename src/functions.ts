@@ -186,9 +186,7 @@ export function importsHas(editor: vscode.TextEditor | undefined, text: string):
     if (editor) {
         try {
             const parsedCode = parse(editor.document.getText());
-            console.log(parsedCode.importDeclaration().pop());
-
-            return false;
+            return parsedCode.importDeclaration().find(it => it.qualifiedName().text === text) !== undefined;
         } catch (error) {
             vscode.window.showErrorMessage('error parsing the Java class check for syntax errors');
             Promise.reject('error parsing the Java class check for syntax errors');

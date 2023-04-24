@@ -20,20 +20,13 @@ let log: OutputChannel;
 export function activate(context: ExtensionContext) {
     commands.executeCommand('setContext', 'includeBeta', includeBeta());
     log = window.createOutputChannel('JavaCodeGenerator');
-    log.show();
 
     let onePanel: WebviewPanel;
     let generateAll = commands.registerCommand('extension.javaGenerateAll', async () => {
         let editor = window.activeTextEditor!;
-        if (!importsHas(editor, 'import java.util.Objects;')) {
-            let importLine = lastImportLocation(editor)!;
-            editor?.edit(edit => {
-                edit.insert(new Position(importLine, 0), 'import java.util.Objects;\n');
-            });
-        }
 
         getSelectedJavaClass(editor)
-            .then(javaClass => {
+            .then(async javaClass => {
                 let result = '';
                 result += generateEmptyConstructor(javaClass);
                 result += generateConstructorUsingFields(javaClass);
@@ -41,7 +34,7 @@ export function activate(context: ExtensionContext) {
                 if (!isIncludeFluentWithSetters()) {
                     result += generateFluentSetters(javaClass);
                 }
-                result += generateHashCodeAndEquals(javaClass);
+                result += await generateHashCodeAndEquals(javaClass);
                 result += generateToString(javaClass);
                 insertSnippet(result, editor);
                 showExistsWarningIfFound();
@@ -53,6 +46,11 @@ export function activate(context: ExtensionContext) {
 
     let generateConstructorCommand = commands.registerCommand('extension.javaGenerateConstructor', () => {
         runner(generateEmptyConstructor);
+    });
+    // private static final long serialVersionUID = 1L;
+
+    let generateSerialVersionUIDCommand = commands.registerCommand('extension.javaGenerateSerialVersionUID', () => {
+        runner(generateSerialVersionUID);
     });
 
     let generateLoggerDebugSelectedText = commands.registerCommand('extension.javaGenerateLoggerDebug', () => {
@@ -119,7 +117,7 @@ export function activate(context: ExtensionContext) {
                                 break;
                             }
                             case 'hashCodeAndEquals': {
-                                insertSnippet(generateHashCodeAndEquals(javaClass), editor);
+                                insertSnippet(await generateHashCodeAndEquals(javaClass), editor);
                                 break;
                             }
                             case 'javaGenerateFluentSetters': {
@@ -198,6 +196,7 @@ export function activate(context: ExtensionContext) {
 
     context.subscriptions.push(generateAll);
     context.subscriptions.push(generateConstructorCommand);
+    context.subscriptions.push(generateSerialVersionUIDCommand);
     context.subscriptions.push(generateLoggerDebugSelectedText);
     context.subscriptions.push(generateConstructorUsingAllFinalFieldsCommand);
     context.subscriptions.push(generateUsingGui);
@@ -401,21 +400,24 @@ function generateEmptyConstructor(javaClass: JavaClass): string {
     }
 }
 
-function generateConstructorUsingFields(javaClass: JavaClass): string {
-    log.appendLine('1');
+function generateSerialVersionUID(javaClass: JavaClass): string {
+    const num1 = Number(Math.random() * 99999).toFixed(0);
+    const num2 = Number(Math.random() * 99999).toFixed(0);
+    const minus = Math.random() * 10 > 5 ? '-' : '';
+    return `\tprivate static final long serialVersionUID = ${minus}${num1}${num2}L;\n`;
+}
 
+function generateConstructorUsingFields(javaClass: JavaClass): string {
     if (javaClass.hasNoneEmptyConstructor) {
-        log.appendLine('2');
         existsWarnings.push('Constructor Using Fields');
         return '';
     }
-    log.appendLine('3');
-
     let result = '';
     result += includeGeneratedAnnotation() ? `\n\t@Generated("sohibe.vscode")` : '';
     result += `\n\tpublic ${javaClass.name}(`;
-    log.appendLine(result);
-
+    if (javaClass.declerations.length <= 0) {
+        return '';
+    }
     javaClass.declerations.forEach(it => {
         if (!it.isFinalValueAlradySet) {
             result += `${it.variableType} ${it.variableName}, `;
@@ -455,7 +457,14 @@ function generateConstructorUsingAllFinalFields(javaClass: JavaClass): string {
     return result;
 }
 
-function generateHashCodeAndEquals(javaClass: JavaClass): string {
+async function generateHashCodeAndEquals(javaClass: JavaClass): Promise<string> {
+    let editor = window.activeTextEditor!;
+    if (!importsHas(editor, 'java.util.Objects')) {
+        let importLine = lastImportLocation(editor)!;
+        await editor?.edit(edit => {
+            edit.insert(new Position(importLine, 0), 'import java.util.Objects;\n');
+        });
+    }
     if (isOnlyIdForHashAndEquals()) {
         return generateHashCodeAndEqualsOnlyId(javaClass);
     }
@@ -479,7 +488,8 @@ function generateHashCodeAndEquals(javaClass: JavaClass): string {
                 result += `Objects.equals(${it.variableName}, ${javaClass.nameLowerCase()}.${it.variableName}) && `;
             }
         });
-        result = result.slice(0, -4) + `;\n\t}\n`;
+
+        result = (javaClass.declerations.length > 0 ? result.slice(0, -4) : `${result}Objects.equals(this, ${javaClass.nameLowerCase()})`) + `;\n\t}\n`;
     } else {
         existsWarnings.push('equals');
     }
@@ -490,7 +500,7 @@ function generateHashCodeAndEquals(javaClass: JavaClass): string {
         if (javaClass.declerations.length > 1) {
             result += `\t\treturn Objects.hash(`;
         } else {
-            result += `\t\treturn Objects.hashCode(`;
+            result += `\t\treturn super.hashCode()(`;
         }
 
         javaClass.declerations.forEach(it => {
