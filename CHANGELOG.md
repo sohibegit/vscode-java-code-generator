@@ -1,5 +1,12 @@
 # Change Log
 
+## [8.0.1] - 2024-03-26
+
+### Added
+
+-   Renamed app from "**Java Code Generators**" to "**Code Generator For Java**" for copyright reasons.
+-   Updated icon for copyright compliance.
+
 ## [7.4.0] - 2021-09-04
 
 ### Added

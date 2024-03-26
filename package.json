@@ -1,16 +1,16 @@
 {
     "name": "java-generate-setters-getters",
-    "displayName": "Java Code Generators",
-    "description": "Java Setter Getter toString Constructor hashCode equals fluent code snippets generator",
+    "displayName": "Code Generator For Java",
+    "description": "Generate Java code snippets with ease: setters, getters, constructors, toString, hashCode, equals, and fluent patterns, all in one streamlined tool.",
     "version": "8.0.0",
     "publisher": "sohibe",
     "license": "MIT",
     "keywords": [
-        "java",
         "setter",
         "getter",
         "constructor",
-        "toString"
+        "toString",
+        "java"
     ],
     "engines": {
         "vscode": "^1.42.0"
@@ -175,7 +175,7 @@
         "submenus": [
             {
                 "id": "generators/editor/annotations",
-                "label": "Java Code Generators"
+                "label": "Code Generator For Java"
             },
             {
                 "id": "generators/editor/beta",
